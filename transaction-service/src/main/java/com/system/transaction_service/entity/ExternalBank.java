@@ -2,6 +2,7 @@ package com.system.transaction_service.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +21,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "ExternalBank")
-@Table(name = "tbl_external_bank")
+@Table(name = "tbl_external_bank",
+        indexes = {
+                @Index(name = "idx_name_code", columnList = "name, short_name, code")
+        }
+)
 @EqualsAndHashCode(callSuper = true)
 public class ExternalBank extends BaseEntity implements Serializable {
 
@@ -33,24 +38,27 @@ public class ExternalBank extends BaseEntity implements Serializable {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "swift_code")
-    private String swiftCode;
-
     @Column(name = "napas_code")
     private String napasCode;
+
+    @Column(name = "swift_code")
+    private String swiftCode;
 
     @Column(name = "contact_info")
     private String contactInfo;
 
     @Column(name = "is_available")
-    private boolean isAvailable;
+    private Boolean isAvailable;
 
     @Column(name = "logo", length = 4000)
     private String logo;
 
+    @Column(name = "logo_image_name")
+    private String logoImageName;
+
     @LastModifiedDate
     @Column(name = "date_updated", insertable = false)
-    private LocalDateTime date_updated;
+    private LocalDateTime dateUpdated;
 
     @CreatedBy
     @Column(name = "creator_id", nullable = false, updatable = false)

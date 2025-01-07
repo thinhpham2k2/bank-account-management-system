@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Nationalized;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -31,8 +30,7 @@ public abstract class BaseEntity implements Serializable {
     @Column(name = "date_created", nullable = false, updatable = false)
     private LocalDateTime dateCreated;
 
-    @Nationalized
-    @Column(name = "description")
+    @Column(name = "description", length = 4000)
     private String description;
 
     @Column(name = "status")

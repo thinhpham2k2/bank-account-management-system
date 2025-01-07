@@ -19,8 +19,6 @@ public class Constant implements Serializable {
     public static final String PHONE_REQUIRE = "message.phone.require";
     public static final String EMAIL_REQUIRE = "message.email.require";
     public static final String PHONE_SIZE = "message.phone.size";
-    public static final String DESCRIPTION_REQUIRE = "message.description.require";
-    public static final String DESCRIPTION_SIZE = "message.description.size";
     public static final String INVALID_PAGE_NUMBER = "message.invalid.page.number";
     public static final String INVALID_PAGE_SIZE = "message.invalid.page.size";
     public static final String INVALID_PROPERTY = "message.invalid.property";
@@ -29,4 +27,16 @@ public class Constant implements Serializable {
     public static final String REQUEST_TIMEOUT = "message.request.timeout";
     public static final String BANDWIDTH_LIMIT_EXCEEDED = "message.bandwidth.limit.exceeded";
     public static final String TOO_MANY_REQUESTS = "message.too.many.requests";
+    public static final String BANK_NAME_REQUIRE = "message.bank.name.require";
+    public static final String BANK_NAME_SIZE = "message.bank.name.size";
+    public static final String SHORT_NAME_REQUIRE = "message.short.name.require";
+    public static final String SHORT_NAME_SIZE = "message.short.name.size";
+    public static final String BANK_CODE_REQUIRE = "message.bank.code.require";
+    public static final String BANK_CODE_SIZE = "message.bank.code.size";
+    public static final String SWIFT_CODE_REQUIRE = "message.swift.code.require";
+    public static final String SWIFT_CODE_SIZE = "message.swift.code.size";
+    public static final String NAPAS_CODE_REQUIRE = "message.napas.code.require";
+    public static final String NAPAS_CODE_SIZE = "message.napas.code.size";
+    public static final String IS_AVAILABLE_REQUIRE = "message.is.available.require";
+    public static final String INVALID_EXTERNAL_BANK = "message.invalid.external.bank";
 }

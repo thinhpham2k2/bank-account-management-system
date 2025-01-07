@@ -25,9 +25,9 @@ public class ExternalTransaction extends Transaction implements Serializable {
     @JoinColumn(name = "external_bank_id")
     private ExternalBank externalBank;
 
-    @Column(name = "swift_code")
-    private String swiftCode;
-
     @Column(name = "napas_code")
     private String napasCode;
+
+    @Column(name = "swift_code")
+    private String swiftCode;
 }

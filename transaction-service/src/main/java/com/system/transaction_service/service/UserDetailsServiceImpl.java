@@ -21,7 +21,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Optional<UserDetailCustom> result = Optional.empty();
+        Optional<UserDetailCustom> result =
+                Optional.of(UserDetailCustom.builder()
+                        .username("admin")
+                        .password("password")
+                        .id("Unknown")
+                        .role("CUSTOMER")
+                        .build());
         return result
                 .orElseThrow(() -> new UsernameNotFoundException(
                         messageSource.getMessage(Constant.INVALID_ACCOUNT, null, LocaleContextHolder.getLocale())));
