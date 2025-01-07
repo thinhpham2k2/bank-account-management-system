@@ -1,7 +1,6 @@
 package com.system.transaction_service.config;
 
 import com.system.transaction_service.auditing.ApplicationAuditAware;
-import com.system.transaction_service.dto.user.UserDetailCustom;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.security.authentication.BasicGrpcAuthenticationReader;
 import net.devh.boot.grpc.server.security.authentication.GrpcAuthenticationReader;
@@ -46,7 +45,7 @@ public class AppConfig {
     }
 
     @Bean
-    public AuditorAware<UserDetailCustom> auditorAware() {
+    public AuditorAware<String> auditorAware() {
 
         return new ApplicationAuditAware();
     }

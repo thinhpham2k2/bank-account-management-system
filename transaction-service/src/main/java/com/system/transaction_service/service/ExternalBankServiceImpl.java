@@ -9,8 +9,10 @@ import com.system.transaction_service.entity.ExternalBank;
 import com.system.transaction_service.mapper.ExternalBankMapper;
 import com.system.transaction_service.repository.ExternalBankRepository;
 import com.system.transaction_service.service.interfaces.ExternalBankService;
+import com.system.transaction_service.service.interfaces.FileService;
 import com.system.transaction_service.service.interfaces.PagingService;
 import com.system.transaction_service.util.Constant;
+import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -38,7 +40,11 @@ public class ExternalBankServiceImpl implements ExternalBankService {
 
     private final PagingService pagingService;
 
+    private final FileService fileService;
+
     private final ExternalBankRepository externalBankRepository;
+
+    private static final String FOLDER_NAME = "Bank";
 
     @Override
     public ExternalBankExtraDTO findById(String id) {
@@ -80,7 +86,19 @@ public class ExternalBankServiceImpl implements ExternalBankService {
 
         try {
 
-            externalBankRepository.save(externalBankMapper.createToEntity(create));
+            ExternalBank bank = externalBankMapper.createToEntity(create);
+
+            try {
+
+                String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
+                bank.setLogo(fileService.upload(create.getLogo(), fileName));
+                bank.setLogoImageName(fileName);
+
+            } catch (Exception ignored) {
+
+            }
+
+            externalBankRepository.save(bank);
         } catch (Exception e) {
 
             throw new InvalidParameterException(
@@ -95,6 +113,26 @@ public class ExternalBankServiceImpl implements ExternalBankService {
         if (bank.isPresent()) {
 
             try {
+
+                try {
+
+                    if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
+
+                        fileService.remove(bank.get().getLogoImageName());
+                    }
+
+                } catch (Exception ignore) {
+
+                }
+
+                try {
+
+                    String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
+                    bank.get().setLogo(fileService.upload(update.getLogo(), fileName));
+                    bank.get().setLogoImageName(fileName);
+                } catch (Exception ignore) {
+
+                }
 
                 externalBankRepository.save(externalBankMapper.updateToEntity(update, bank.get()));
             } catch (Exception e) {
@@ -116,6 +154,17 @@ public class ExternalBankServiceImpl implements ExternalBankService {
         if (bank.isPresent()) {
 
             try {
+
+                try {
+
+                    if (!bank.get().getLogoImageName().isBlank()) {
+
+                        fileService.remove(bank.get().getLogoImageName());
+                    }
+
+                } catch (Exception ignore) {
+
+                }
 
                 bank.get().setStatus(false);
                 externalBankRepository.save(bank.get());
