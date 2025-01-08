@@ -1,0 +1,58 @@
+name: docker-compose
+services:
+  database:
+    container_name: database-mysql
+    image: mysql:8.0.40-debian
+    ports:
+      - "8000:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=12345
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "database-mysql" ]
+      interval: 7s
+      timeout: 5s
+      retries: 3
+    networks:
+      - microservice_networks
+
+  transaction:
+    container_name: transaction-service
+    build:
+      context: .
+      dockerfile: ./transaction-service/Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      - DB_USERNAME=root
+      - DB_PASSWORD=12345
+      - DB_URL=jdbc:mysql://database:3306/transaction_db
+      - DOCKER_HOST=host.docker.internal
+      - RABBITMQ_USER=root
+      - RABBITMQ_PASS=12345
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - microservice_networks
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    command: [ "bash", "-c", "redis-server --appendonly yes --requirepass 12345" ]
+    volumes:
+      - cache:/data
+    networks:
+      - microservice_networks
+
+volumes:
+    cache:
+      driver: local
+
+networks:
+  microservice_networks:
+    driver: bridge
