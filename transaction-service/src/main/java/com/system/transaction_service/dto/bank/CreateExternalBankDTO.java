@@ -1,6 +1,10 @@
 package com.system.transaction_service.dto.bank;
 
 import com.system.transaction_service.util.Constant;
+import com.system.transaction_service.validation.interfaces.BankCodeConstraint;
+import com.system.transaction_service.validation.interfaces.FileConstraint;
+import com.system.transaction_service.validation.interfaces.NapasCodeConstraint;
+import com.system.transaction_service.validation.interfaces.SwiftCodeConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,14 +29,17 @@ public class CreateExternalBankDTO implements Serializable {
     @Size(min = 2, max = 255, message = "{" + Constant.SHORT_NAME_SIZE + "}")
     private String shortName;
 
+    @BankCodeConstraint
     @NotNull(message = "{" + Constant.BANK_CODE_REQUIRE + "}")
     @Size(min = 2, max = 50, message = "{" + Constant.BANK_CODE_SIZE + "}")
     private String code;
 
+    @NapasCodeConstraint
     @NotNull(message = "{" + Constant.NAPAS_CODE_REQUIRE + "}")
     @Size(min = 2, max = 50, message = "{" + Constant.NAPAS_CODE_SIZE + "}")
     private String napasCode;
 
+    @SwiftCodeConstraint
     @NotNull(message = "{" + Constant.SWIFT_CODE_REQUIRE + "}")
     @Size(min = 2, max = 50, message = "{" + Constant.SWIFT_CODE_SIZE + "}")
     private String swiftCode;
@@ -42,6 +49,7 @@ public class CreateExternalBankDTO implements Serializable {
 
     private String contactInfo;
 
+    @FileConstraint
     private MultipartFile logo;
 
     private String description;

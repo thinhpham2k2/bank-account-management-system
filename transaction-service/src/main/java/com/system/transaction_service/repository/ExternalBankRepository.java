@@ -12,6 +12,12 @@ import java.util.Optional;
 @Repository
 public interface ExternalBankRepository extends JpaRepository<ExternalBank, String> {
 
+    Boolean existsByCode(String code);
+
+    Boolean existsByNapasCode(String napasCode);
+
+    Boolean existsBySwiftCode(String swiftCode);
+
     Optional<ExternalBank> findByIdAndStatus(String id, Boolean status);
 
     @Query("SELECT b FROM ExternalBank b " +

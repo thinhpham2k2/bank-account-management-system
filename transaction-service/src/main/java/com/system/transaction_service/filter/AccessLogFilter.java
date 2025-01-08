@@ -2,6 +2,7 @@ package com.system.transaction_service.filter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.system.transaction_service.util.Constant;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -50,20 +52,26 @@ public class AccessLogFilter extends OncePerRequestFilter {
                     remoteIpAddress = requestWrapper.getRemoteAddr();
                 }
 
+                String requestContentType = Optional.ofNullable(requestWrapper.getContentType()).orElse("");
+                String responseContentType = Optional.ofNullable(responseWrapper.getContentType()).orElse("");
                 String parameter = getParameter(requestWrapper.getParameterMap());
-                String requestBody = requestWrapper.getContentType().startsWith(
-                        ContentType.MULTIPART_FORM_DATA.getMimeType()) ? parameter :
-                        new String(requestWrapper.getContentAsByteArray(), request.getCharacterEncoding());
-                String responseBody = requestWrapper.getMethod().equalsIgnoreCase(HttpMethod.GET.toString()) ? "" :
-                        new String(responseWrapper.getContentAsByteArray(), response.getCharacterEncoding());
+                String requestBody = requestContentType.startsWith(ContentType.MULTIPART_FORM_DATA.getMimeType())
+                        ? parameter :
+                        new String(requestWrapper.getContentAsByteArray(), requestWrapper.getCharacterEncoding());
+                String responseBody = requestWrapper.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())
+                        ? Constant.BLANK :
+                        new String(responseWrapper.getContentAsByteArray(), responseWrapper.getCharacterEncoding());
 
-                try {
+                if (!responseBody.isBlank()) {
 
-                    Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-                    Object json = gson.fromJson(responseBody, Object.class);
-                    responseBody = gson.toJson(json);
-                } catch (Exception ignored) {
+                    try {
 
+                        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+                        Object json = gson.fromJson(responseBody, Object.class);
+                        responseBody = gson.toJson(json);
+                    } catch (Exception ignored) {
+
+                    }
                 }
 
                 log.info("""
@@ -78,9 +86,9 @@ public class AccessLogFilter extends OncePerRequestFilter {
                                 {}
                                 . Response body (Content type: {}):
                                 {}""",
-                        remoteIpAddress, requestWrapper.getMethod(), requestWrapper.getRequestURI(),
-                        parameter, responseWrapper.getStatus(), time,
-                        requestWrapper.getContentType(), requestBody, responseWrapper.getContentType(), responseBody);
+                        remoteIpAddress, requestWrapper.getMethod(), requestWrapper.getRequestURI(), parameter,
+                        responseWrapper.getStatus(), time,
+                        requestContentType, requestBody, responseContentType, responseBody);
                 requestWrapper.getInputStream();
                 responseWrapper.copyBodyToResponse();
             }
@@ -105,7 +113,6 @@ public class AccessLogFilter extends OncePerRequestFilter {
             }
         }
 
-
-        return sb.substring(0, sb.lastIndexOf(","));
+        return sb.lastIndexOf(",") < 1 ? sb.toString() : sb.substring(0, sb.lastIndexOf(","));
     }
 }

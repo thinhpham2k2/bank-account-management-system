@@ -14,10 +14,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -31,6 +33,20 @@ import java.util.concurrent.TimeoutException;
 public class ApplicationExceptionHandler {
 
     private final MessageSource messageSource;
+
+    @ExceptionHandler({MaxUploadSizeExceededException.class})
+    public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.PAYLOAD_TOO_LARGE, null, LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler({HttpMediaTypeNotSupportedException.class})
+    public ResponseEntity<?> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
+
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.UNSUPPORTED_MEDIA_TYPE, null, LocaleContextHolder.getLocale()));
+    }
 
     @ExceptionHandler({CallNotPermittedException.class})
     public ResponseEntity<?> handleCallNotPermittedException(CallNotPermittedException ex) {

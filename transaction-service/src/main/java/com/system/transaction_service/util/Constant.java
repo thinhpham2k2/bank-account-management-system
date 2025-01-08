@@ -40,4 +40,15 @@ public class Constant implements Serializable {
     public static final String NAPAS_CODE_SIZE = "message.napas.code.size";
     public static final String IS_AVAILABLE_REQUIRE = "message.is.available.require";
     public static final String INVALID_EXTERNAL_BANK = "message.invalid.external.bank";
+    public static final String INVALID_BANK_CODE = "message.invalid.bank.code";
+    public static final String DUPLICATE_BANK_CODE = "message.duplicate.bank.code";
+    public static final String INVALID_NAPAS_CODE = "message.invalid.napas.code";
+    public static final String DUPLICATE_NAPAS_CODE = "message.duplicate.napas.code";
+    public static final String INVALID_SWIFT_CODE = "message.invalid.swift.code";
+    public static final String DUPLICATE_SWIFT_CODE = "message.duplicate.swift.code";
+    public static final String INVALID_IMAGE_FILE = "message.invalid.image.file";
+    public static final String INVALID_IMAGE_FILE_SIZE = "message.invalid.image.file.size";
+    public static final String INVALID_IMAGE_FILE_TYPE = "message.invalid.image.file.type";
+    public static final String UNSUPPORTED_MEDIA_TYPE = "message.unsupported.media.type";
+    public static final String PAYLOAD_TOO_LARGE = "message.payload.too.media";
 }
