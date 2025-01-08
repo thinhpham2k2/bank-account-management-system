@@ -17,6 +17,23 @@ services:
     networks:
       - microservice_networks
 
+  gateway:
+    container_name: gateway-service
+    build:
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    environment:
+      - DOCKER_HOST=host.docker.internal
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+      transaction:
+        condition: service_started
+    networks:
+      - microservice_networks
+
   transaction:
     container_name: transaction-service
     build:
