@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Constant implements Serializable {
 
+    public static final String BLANK = "";
     public static final String NOT_FOUND = "message.not.found";
     public static final String CREATE_SUCCESS = "message.create.success";
     public static final String CREATE_FAIL = "message.create.fail";

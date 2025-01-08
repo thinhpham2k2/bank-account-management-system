@@ -6,8 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.http.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -49,33 +50,37 @@ public class AccessLogFilter extends OncePerRequestFilter {
                     remoteIpAddress = requestWrapper.getRemoteAddr();
                 }
 
-                String requestBody = new String(requestWrapper.getContentAsByteArray(), request.getCharacterEncoding());
+                String parameter = getParameter(requestWrapper.getParameterMap());
+                String requestBody = requestWrapper.getContentType().startsWith(
+                        ContentType.MULTIPART_FORM_DATA.getMimeType()) ? parameter :
+                        new String(requestWrapper.getContentAsByteArray(), request.getCharacterEncoding());
                 String responseBody = requestWrapper.getMethod().equalsIgnoreCase(HttpMethod.GET.toString()) ? "" :
                         new String(responseWrapper.getContentAsByteArray(), response.getCharacterEncoding());
 
                 try {
 
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
                     Object json = gson.fromJson(responseBody, Object.class);
                     responseBody = gson.toJson(json);
                 } catch (Exception ignored) {
 
                 }
 
-                log.info(""" 
+                log.info("""
                                 
-                                Client IP: {}\s
-                                Method: {}\s
-                                Path: {}\s
-                                Parameters: {}\s
-                                Content type: {}\s
-                                Status code: {}\s
-                                Time: {}ms\s
-                                Request body: {}\s
-                                Response body: {}\s""",
+                                . Client IP: {}
+                                . Method: {}
+                                . Path: {}
+                                . Parameters: {}
+                                . Status code: {}
+                                . Time: {}ms
+                                . Request body (Content type: {}):
+                                {}
+                                . Response body (Content type: {}):
+                                {}""",
                         remoteIpAddress, requestWrapper.getMethod(), requestWrapper.getRequestURI(),
-                        getParameter(requestWrapper.getParameterMap()), responseWrapper.getContentType(),
-                        responseWrapper.getStatus(), time, requestBody, responseBody);
+                        parameter, responseWrapper.getStatus(), time,
+                        requestWrapper.getContentType(), requestBody, responseWrapper.getContentType(), responseBody);
                 requestWrapper.getInputStream();
                 responseWrapper.copyBodyToResponse();
             }
@@ -100,6 +105,7 @@ public class AccessLogFilter extends OncePerRequestFilter {
             }
         }
 
-        return sb.toString();
+
+        return sb.substring(0, sb.lastIndexOf(","));
     }
 }

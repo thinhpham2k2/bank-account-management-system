@@ -88,14 +88,12 @@ public class ExternalBankServiceImpl implements ExternalBankService {
 
             ExternalBank bank = externalBankMapper.createToEntity(create);
 
-            try {
+            String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
+            String link = fileService.upload(create.getLogo(), fileName);
+            if (!link.isBlank()) {
 
-                String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
-                bank.setLogo(fileService.upload(create.getLogo(), fileName));
+                bank.setLogo(link);
                 bank.setLogoImageName(fileName);
-
-            } catch (Exception ignored) {
-
             }
 
             externalBankRepository.save(bank);
@@ -114,24 +112,17 @@ public class ExternalBankServiceImpl implements ExternalBankService {
 
             try {
 
-                try {
+                if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
 
-                    if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
-
-                        fileService.remove(bank.get().getLogoImageName());
-                    }
-
-                } catch (Exception ignore) {
-
+                    fileService.remove(bank.get().getLogoImageName());
                 }
 
-                try {
+                String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
+                String link = fileService.upload(update.getLogo(), fileName);
+                if (!link.isBlank()) {
 
-                    String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
-                    bank.get().setLogo(fileService.upload(update.getLogo(), fileName));
+                    bank.get().setLogo(link);
                     bank.get().setLogoImageName(fileName);
-                } catch (Exception ignore) {
-
                 }
 
                 externalBankRepository.save(externalBankMapper.updateToEntity(update, bank.get()));
@@ -155,15 +146,9 @@ public class ExternalBankServiceImpl implements ExternalBankService {
 
             try {
 
-                try {
+                if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
 
-                    if (!bank.get().getLogoImageName().isBlank()) {
-
-                        fileService.remove(bank.get().getLogoImageName());
-                    }
-
-                } catch (Exception ignore) {
-
+                    fileService.remove(bank.get().getLogoImageName());
                 }
 
                 bank.get().setStatus(false);

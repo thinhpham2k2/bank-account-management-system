@@ -30,16 +30,25 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        ResponseEntity<?> rs = restTemplate.getForEntity(URL, BankApiDTO.class);
 
-        if (externalBankRepository.count() <= 0 && rs.getStatusCode().equals(HttpStatus.OK)) {
+        try {
 
-            BankApiDTO dto = (BankApiDTO) Objects.requireNonNull(rs.getBody());
+            if (externalBankRepository.count() <= 0) {
 
-            externalBankRepository.saveAll(dto.getData().stream()
-                    .map(bankApiMapper::responseToEntity).toList());
+                ResponseEntity<?> rs = restTemplate.getForEntity(URL, BankApiDTO.class);
 
-            log.info("Database initialized: Add {} banks", dto.getData().size());
+                if (rs.getStatusCode().equals(HttpStatus.OK)) {
+
+                    BankApiDTO dto = (BankApiDTO) Objects.requireNonNull(rs.getBody());
+
+                    externalBankRepository.saveAll(dto.getData().stream()
+                            .map(bankApiMapper::responseToEntity).toList());
+
+                    log.info("Database initialized: Add {} banks", dto.getData().size());
+                }
+            }
+        } catch (Exception ignore) {
+
         }
     }
 }

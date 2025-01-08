@@ -3,16 +3,18 @@ package com.system.transaction_service.service;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import com.system.transaction_service.service.interfaces.FileService;
+import com.system.transaction_service.util.Constant;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class FileServiceImpl implements FileService {
 
@@ -20,30 +22,39 @@ public class FileServiceImpl implements FileService {
     private String imageBaseUrl;
 
     @Override
-    public String upload(MultipartFile multipartFile, String fileName) throws IOException {
+    public String upload(MultipartFile multipartFile, String fileName) {
 
-        InputStream inputStream = multipartFile.getInputStream();
-        Bucket bucket = StorageClient.getInstance().bucket();
-        bucket.create(fileName, inputStream, "image/" +
-                this.getExtension(Objects.requireNonNull(multipartFile.getOriginalFilename())));
+        try {
 
-        return String.format(imageBaseUrl, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+            if (!multipartFile.isEmpty()) {
+
+                InputStream inputStream = multipartFile.getInputStream();
+                Bucket bucket = StorageClient.getInstance().bucket();
+                bucket.create(fileName, inputStream, "image/" +
+                        this.getExtension(Objects.requireNonNull(multipartFile.getOriginalFilename())));
+
+                return String.format(imageBaseUrl, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+            }
+        } catch (Exception ignore) {
+
+            log.info("Upload file name {} failed", fileName);
+        }
+        
+        return Constant.BLANK;
     }
 
-    @Override
-    public boolean remove(String fileName) throws IOException {
-
-        Bucket bucket = StorageClient.getInstance().bucket();
-
-        System.out.println(bucket.get(fileName));
-
-        return bucket.get(fileName).delete();
-    }
 
     @Override
-    public String download(String fileName) throws IOException {
+    public void remove(String fileName) {
 
-        return "";
+        try {
+
+            Bucket bucket = StorageClient.getInstance().bucket();
+            bucket.get(fileName).delete();
+        } catch (Exception ignore) {
+
+            log.info("Remove file name {} failed", fileName);
+        }
     }
 
     private String getExtension(String fileName) {
