@@ -15,6 +15,8 @@ import com.system.transaction_service.util.Constant;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -47,6 +49,7 @@ public class ExternalBankServiceImpl implements ExternalBankService {
     private static final String FOLDER_NAME = "Bank";
 
     @Override
+    @Cacheable(cacheNames = "external_banks:detail", key = "#id")
     public ExternalBankExtraDTO findById(String id) {
 
         Optional<ExternalBank> bank = externalBankRepository.findByIdAndStatus(id, true);
@@ -55,7 +58,9 @@ public class ExternalBankServiceImpl implements ExternalBankService {
     }
 
     @Override
-    public PagedDTO<ExternalBankDTO> findAllByCondition(Boolean isAvailable, String search, String sort, int page, int limit) {
+    @Cacheable(cacheNames = "external_banks:list")
+    public PagedDTO<ExternalBankDTO> findAllByCondition(
+            Boolean isAvailable, String search, String sort, int page, int limit) {
 
         if (page < 0) throw new InvalidParameterException(
                 messageSource.getMessage(Constant.INVALID_PAGE_NUMBER, null, LocaleContextHolder.getLocale()));
@@ -139,6 +144,7 @@ public class ExternalBankServiceImpl implements ExternalBankService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "external_banks:detail", key = "#id")
     public void delete(String id) {
 
         Optional<ExternalBank> bank = externalBankRepository.findByIdAndStatus(id, true);
