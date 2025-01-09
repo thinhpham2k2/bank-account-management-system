@@ -1,6 +1,7 @@
 package com.system.transaction_service.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.system.common_library.enums.State;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class TransactionState extends BaseEntity implements Serializable {
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "state")
-    private Boolean state;
+    private State state;
 }

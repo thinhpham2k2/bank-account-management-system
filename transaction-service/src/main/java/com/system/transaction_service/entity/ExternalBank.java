@@ -1,9 +1,7 @@
 package com.system.transaction_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,6 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -70,4 +69,8 @@ public class ExternalBank extends BaseEntity implements Serializable {
 
     @Column(name = "state")
     private Boolean state;
+
+    @OneToMany(mappedBy = "externalBank", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<ExternalTransaction> externalTransactionList;
 }

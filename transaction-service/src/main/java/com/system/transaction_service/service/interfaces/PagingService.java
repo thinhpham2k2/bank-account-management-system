@@ -1,14 +1,8 @@
 package com.system.transaction_service.service.interfaces;
 
-import org.springframework.data.domain.Sort;
-
-import java.util.Set;
+import org.springframework.data.domain.Pageable;
 
 public interface PagingService {
 
-    Set<String> getAllFields(final Class<?> type);
-
-    Sort.Direction getSortDirection(String direction);
-
-    boolean checkPropertyPresent(final Set<String> properties, final String propertyName);
+    Pageable getPageable(String sort, int page, int limit, Class<?> type);
 }

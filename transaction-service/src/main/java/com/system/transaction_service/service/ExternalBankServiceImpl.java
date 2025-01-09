@@ -13,6 +13,7 @@ import com.system.transaction_service.service.interfaces.FileService;
 import com.system.transaction_service.service.interfaces.PagingService;
 import com.system.transaction_service.util.Constant;
 import de.huxhorn.sulky.ulid.ULID;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,19 +21,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ExternalBankServiceImpl implements ExternalBankService {
 
@@ -62,25 +59,7 @@ public class ExternalBankServiceImpl implements ExternalBankService {
     public PagedDTO<ExternalBankDTO> findAllByCondition(
             Boolean isAvailable, String search, String sort, int page, int limit) {
 
-        if (page < 0) throw new InvalidParameterException(
-                messageSource.getMessage(Constant.INVALID_PAGE_NUMBER, null, LocaleContextHolder.getLocale()));
-        if (limit < 1) throw new InvalidParameterException(
-                messageSource.getMessage(Constant.INVALID_PAGE_SIZE, null, LocaleContextHolder.getLocale()));
-
-        List<Sort.Order> order = new ArrayList<>();
-
-        Set<String> sourceFieldList = pagingService.getAllFields(ExternalBank.class);
-        String[] subSort = sort.split(",");
-        if (pagingService.checkPropertyPresent(sourceFieldList, subSort[0])) {
-
-            order.add(new Sort.Order(pagingService.getSortDirection(subSort[1]), subSort[0]));
-        } else {
-
-            throw new InvalidParameterException("{" + subSort[0] + "} " +
-                    messageSource.getMessage(Constant.INVALID_PROPERTY, null, LocaleContextHolder.getLocale()));
-        }
-
-        Pageable pageable = PageRequest.of(page, limit).withSort(Sort.by(order));
+        Pageable pageable = pagingService.getPageable(sort, page, limit, ExternalBank.class);
         Page<ExternalBank> pageResult = externalBankRepository.findAllByCondition(true, isAvailable, search, pageable);
 
         return new PagedDTO<>(pageResult.map(externalBankMapper::entityToDTO));

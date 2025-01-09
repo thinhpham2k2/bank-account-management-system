@@ -1,9 +1,7 @@
 package com.system.transaction_service.entity;
 
-import com.system.common_library.enums.AccountType;
-import com.system.common_library.enums.FeePayer;
-import com.system.common_library.enums.Initiator;
-import com.system.common_library.enums.Method;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.system.common_library.enums.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +12,7 @@ import org.springframework.data.annotation.CreatedBy;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -79,10 +78,22 @@ public abstract class Transaction extends BaseEntity implements Serializable {
     private Initiator initiator;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type")
+    private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "method")
     private Method method;
 
     @CreatedBy
     @Column(name = "creator_id", nullable = false, updatable = false)
     private String creatorId;
+
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<TransactionDetail> transactionDetailList;
+
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<TransactionState> transactionStateList;
 }
