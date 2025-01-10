@@ -1,6 +1,6 @@
 package com.system.transaction_service.service;
 
-import com.system.transaction_service.config.JwtConfig;
+import com.system.transaction_service.config.VaultConfig;
 import com.system.transaction_service.service.interfaces.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,7 +18,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    private final JwtConfig jwtConfig;
+    private final VaultConfig vaultConfig;
 
     private static final String DEFAULT_KEY = "Y29udHJvbHRpcmVkdHJhcHNob290aHVuZHJlZGxhdWdoc29sZHdpc2Vwcm91ZGRlYXQ=";
 
@@ -43,7 +43,7 @@ public class JwtServiceImpl implements JwtService {
 
     private Claims getAllClaims(String token) {
 
-        String key = StringUtils.isBlank(jwtConfig.getKey()) ? DEFAULT_KEY : jwtConfig.getKey();
+        String key = StringUtils.isBlank(vaultConfig.getJwtKey()) ? DEFAULT_KEY : vaultConfig.getJwtKey();
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(key));
 
         return Jwts

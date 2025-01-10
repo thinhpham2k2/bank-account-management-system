@@ -29,6 +29,15 @@ public class TransactionDetail extends BaseEntity implements Serializable {
     @Column(name = "account")
     private String account;
 
+    @Column(name = "amount")
+    private BigDecimal amount;
+
+    @Column(name = "fee")
+    private BigDecimal fee;
+
+    @Column(name = "net_amount")
+    private BigDecimal netAmount;
+
     @Column(name = "previous_balance")
     private BigDecimal previousBalance;
 
@@ -38,10 +47,10 @@ public class TransactionDetail extends BaseEntity implements Serializable {
     @Column(name = "available_balance")
     private BigDecimal availableBalance;
 
-    @Column(name = "amount")
-    private BigDecimal amount;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "direction")
     private Direction direction;
+
+    @Column(name = "reference_code")
+    private String referenceCode;
 }

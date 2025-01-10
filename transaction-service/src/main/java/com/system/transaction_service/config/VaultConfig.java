@@ -6,8 +6,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("jwt")
-public class JwtConfig {
+@ConfigurationProperties("bank")
+public class VaultConfig {
 
-    private String key;
+    private String accountNumber;
+    private String jwtKey;
 }

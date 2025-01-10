@@ -56,7 +56,7 @@ public class PagedDTO<T> implements Serializable {
         return Objects.hash(page);
     }
 
-    public static record PageMetadata(long size, long number, long totalElements, long totalPages) {
+    public record PageMetadata(long size, long number, long totalElements, long totalPages) {
 
         public PageMetadata {
             Assert.isTrue(size > -1, "Size must not be negative!");

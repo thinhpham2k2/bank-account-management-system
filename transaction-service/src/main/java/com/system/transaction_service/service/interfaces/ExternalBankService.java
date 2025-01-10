@@ -14,7 +14,7 @@ public interface ExternalBankService {
 
     void create(CreateExternalBankDTO create);
 
-    void update(UpdateExternalBankDTO update, String id);
+    ExternalBankExtraDTO update(UpdateExternalBankDTO update, String id);
 
     void delete(String id);
 }

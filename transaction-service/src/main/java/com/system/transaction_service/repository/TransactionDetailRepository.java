@@ -28,8 +28,6 @@ public interface TransactionDetailRepository extends JpaRepository<TransactionDe
             "OR d.transaction.accountSenderName LIKE %?7% " +
             "OR d.transaction.accountReceiver LIKE %?7% " +
             "OR d.transaction.accountReceiverName LIKE %?7% " +
-            "OR d.transaction.externalBank.name LIKE %?7% " +
-            "OR d.transaction.externalBank.shortName LIKE %?7% " +
             "OR d.transaction.note LIKE %?7% " +
             "OR d.transaction.description LIKE %?7%)" +
             "AND d.transaction.amount BETWEEN ?8 AND ?9")

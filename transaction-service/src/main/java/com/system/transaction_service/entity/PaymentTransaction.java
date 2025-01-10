@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Data
 @SuperBuilder
@@ -38,6 +39,9 @@ public class PaymentTransaction extends Transaction implements Serializable {
     @Column(name = "provider_code")
     private String providerCode;
 
+    @Column(name = "invoice_number")
+    private String invoiceNumber;
+
     @Column(name = "promotion_code")
     private String promotionCode;
 
@@ -46,6 +50,12 @@ public class PaymentTransaction extends Transaction implements Serializable {
 
     @Column(name = "payment_code")
     private String paymentCode;
+
+    @Column(name = "issue_date")
+    private LocalDateTime issueDate;
+
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
 
     @Column(name = "state")
     private Boolean state;

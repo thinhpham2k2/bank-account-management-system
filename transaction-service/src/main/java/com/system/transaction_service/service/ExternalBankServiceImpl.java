@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -89,14 +90,16 @@ public class ExternalBankServiceImpl implements ExternalBankService {
     }
 
     @Override
-    public void update(UpdateExternalBankDTO update, String id) {
+    @CachePut(cacheNames = "external_banks:detail", key = "#id")
+    public ExternalBankExtraDTO update(UpdateExternalBankDTO update, String id) {
 
         Optional<ExternalBank> bank = externalBankRepository.findByIdAndStatus(id, true);
         if (bank.isPresent()) {
 
             try {
 
-                if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
+                if (!Optional.ofNullable(bank.get().getLogo()).orElse("").isBlank() &&
+                        !Optional.ofNullable(bank.get().getLogoImageName()).orElse("").isBlank()) {
 
                     fileService.remove(bank.get().getLogoImageName());
                 }
@@ -109,7 +112,8 @@ public class ExternalBankServiceImpl implements ExternalBankService {
                     bank.get().setLogoImageName(fileName);
                 }
 
-                externalBankRepository.save(externalBankMapper.updateToEntity(update, bank.get()));
+                ExternalBank entity = externalBankRepository.save(externalBankMapper.updateToEntity(update, bank.get()));
+                return externalBankMapper.entityToExtraDTO(entity);
             } catch (Exception e) {
 
                 throw new InvalidParameterException(
