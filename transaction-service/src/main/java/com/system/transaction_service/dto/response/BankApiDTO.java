@@ -22,7 +22,7 @@ public class BankApiDTO implements Serializable {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class BankResponse implements Serializable{
+    public static class BankResponse implements Serializable {
 
         private String id;
         private String name;

@@ -1,8 +1,10 @@
 package com.system.transaction_service.controller;
 
 import com.system.common_library.enums.*;
+import com.system.transaction_service.dto.request.OTPRequestDTO;
 import com.system.transaction_service.dto.response.PagedDTO;
 import com.system.transaction_service.dto.transaction.*;
+import com.system.transaction_service.service.interfaces.NotificationService;
 import com.system.transaction_service.service.interfaces.TransactionDetailService;
 import com.system.transaction_service.util.Constant;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +39,8 @@ public class TransactionController {
     private final MessageSource messageSource;
 
     private final TransactionDetailService transactionDetailService;
+
+    private final NotificationService notificationService;
 
     @GetMapping("")
     @Operation(summary = "Get transaction list")
@@ -117,6 +121,30 @@ public class TransactionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN).body(
                     messageSource.getMessage(Constant.NOT_FOUND, null, LocaleContextHolder.getLocale()));
         }
+    }
+
+    @PostMapping("/otp-code")
+    @Operation(summary = "Send OTP code to email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> sendOtp(@RequestBody @Validated OTPRequestDTO request)
+            throws MethodArgumentTypeMismatchException {
+
+        // Send OTP code
+        notificationService.sendOtpCode(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
+                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
     }
 
     @PostMapping("/external")

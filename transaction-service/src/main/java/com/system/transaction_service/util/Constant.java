@@ -51,4 +51,6 @@ public class Constant implements Serializable {
     public static final String INVALID_IMAGE_FILE_TYPE = "message.invalid.image.file.type";
     public static final String UNSUPPORTED_MEDIA_TYPE = "message.unsupported.media.type";
     public static final String PAYLOAD_TOO_LARGE = "message.payload.too.media";
+    public static final String INVALID_OTP_CODE = "message.invalid.otp.code";
+    public static final String INSUFFICIENT_BALANCE = "message.insufficient.balance";
 }

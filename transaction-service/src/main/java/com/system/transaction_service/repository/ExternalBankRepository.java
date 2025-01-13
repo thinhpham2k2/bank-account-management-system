@@ -20,6 +20,8 @@ public interface ExternalBankRepository extends JpaRepository<ExternalBank, Stri
 
     Optional<ExternalBank> findByIdAndStatus(String id, Boolean status);
 
+    Optional<ExternalBank> findByNapasCodeAndStatus(String napasCode, Boolean status);
+
     @Query("SELECT b FROM ExternalBank b " +
             "WHERE b.status = ?1 " +
             "AND (?2 IS NULL OR b.isAvailable = ?2) " +

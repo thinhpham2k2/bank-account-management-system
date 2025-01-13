@@ -1,12 +1,15 @@
 package com.system.transaction_service.service;
 
+import com.system.common_library.dto.response.AccountDTO;
 import com.system.common_library.enums.*;
+import com.system.transaction_service.config.VaultConfig;
 import com.system.transaction_service.dto.response.PagedDTO;
 import com.system.transaction_service.dto.transaction.*;
 import com.system.transaction_service.entity.ExternalTransaction;
 import com.system.transaction_service.entity.InternalTransaction;
 import com.system.transaction_service.entity.TransactionDetail;
 import com.system.transaction_service.mapper.TransactionDetailMapper;
+import com.system.transaction_service.repository.ExternalBankRepository;
 import com.system.transaction_service.repository.TransactionDetailRepository;
 import com.system.transaction_service.repository.TransactionRepository;
 import com.system.transaction_service.service.interfaces.PagingService;
@@ -21,6 +24,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,6 +41,10 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
 
     private final MessageSource messageSource;
 
+    private final VaultConfig vaultConfig;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private final TransactionDetailMapper transactionDetailMapper;
 
     private final PagingService pagingService;
@@ -44,6 +52,8 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
     private final TransactionDetailRepository transactionDetailRepository;
 
     private final TransactionRepository transactionRepository;
+
+    private final ExternalBankRepository externalBankRepository;
 
     @Override
     public TransactionExtraDTO findById(String id) {
@@ -68,7 +78,8 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
         pageResult = new PageImpl<>(pageResult.stream().filter(
                 p -> (typeList.isEmpty() ||
                         (p.getTransaction() instanceof InternalTransaction i &&
-                                typeList.contains(i.getType())))).toList(), pageResult.getPageable(), pageResult.getTotalElements());
+                                typeList.contains(
+                                        i.getType())))).toList(), pageResult.getPageable(), pageResult.getTotalElements());
 
         return new PagedDTO<>(pageResult.map(transactionDetailMapper::entityToDTO));
     }
@@ -79,48 +90,108 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
         try {
 
             // Check OTP (Notification service)
+            Object otpFromRedis = redisTemplate.opsForValue().get(
+                    create.getAccountSender() + create.getAccountReceiver());
 
-            // Check account sender validation (Core banking)
+            if (otpFromRedis == null || !otpFromRedis.toString().equals(create.getOtpCode())) {
 
-            // Check account receiver validation (Napas)
+                throw new InvalidParameterException(
+                        messageSource.getMessage(Constant.INVALID_OTP_CODE, null, LocaleContextHolder.getLocale()));
+            } else {
 
-            // Create external transaction
-            ExternalTransaction transaction = transactionDetailMapper.createToExternalEntity(create);
+                // Check sender account validation (Core banking)
+                AccountDTO senderAccount = AccountDTO.builder().build();
 
-            // Create transaction detail
-            BigDecimal fee = create.getFee();
+                // Check receiver account validation (Napas)
+                AccountDTO receiverAccount = AccountDTO.builder().build();
 
-            BigDecimal amount = (fee.compareTo(BigDecimal.ZERO) > 0 || create.getFeePayer().equals(FeePayer.SENDER)) ?
-                    create.getAmount() : create.getAmount().add(fee.negate());
+                // Check master account (Core banking)
+                AccountDTO masterAccount = AccountDTO.builder().build();
 
-            BigDecimal netAmount = create.getFee();
+                boolean isPayFee = create.getFee().compareTo(BigDecimal.ZERO) > 0;
+                if (senderAccount == null || !senderAccount.getIsActive() ||
+                        receiverAccount == null || !receiverAccount.getIsActive() ||
+                        (isPayFee && (masterAccount == null || !masterAccount.getIsActive()))) {
 
-            List<TransactionDetail> detailList = new ArrayList<>(List.of(
-                    TransactionDetail.builder()
-                            .id(new ULID().nextULID())
-                            .account(create.getAccountSender())
-                            .amount(amount)
-                            .fee(fee)
-                            .netAmount(netAmount)
-                            .build()));
+                    throw new InvalidParameterException(
+                            messageSource.getMessage(
+                                    Constant.INVALID_ACCOUNT, null, LocaleContextHolder.getLocale()));
+                } else {
 
-            if (transaction.getFee().compareTo(BigDecimal.ZERO) > 0)
-                detailList.add(TransactionDetail.builder()
-                        .build());
+                    // Create external transaction
+                    ExternalTransaction transaction = transactionDetailMapper.createToExternalEntity(create);
+                    transaction.setExternalBank(
+                            externalBankRepository.findByNapasCodeAndStatus(create.getNapasCode(), true)
+                                    .orElseThrow(Exception::new));
 
-            // Set transaction detail
-            transaction.setTransactionDetailList(detailList);
+                    // Create transaction detail
+                    BigDecimal amount = create.getAmount().negate();
 
-            // Save transaction
-            transactionRepository.save(transaction);
+                    BigDecimal fee = create.getFeePayer().equals(FeePayer.SENDER) ? create.getFee() : BigDecimal.ZERO;
 
-            // Update account sender balance
+                    BigDecimal netAmount = amount.add(fee.negate());
 
-            // Send event to notification service
+                    if (senderAccount.getBalance().compareTo(netAmount.abs()) < 0) {
 
+                        throw new InvalidParameterException(
+                                messageSource.getMessage(
+                                        Constant.INSUFFICIENT_BALANCE, null, LocaleContextHolder.getLocale()));
+                    }
+
+                    String id = new ULID().nextULID();
+                    List<TransactionDetail> detailList = new ArrayList<>(List.of(
+                            TransactionDetail.builder()
+                                    .id(id)
+                                    .account(create.getAccountSender())
+                                    .amount(amount)
+                                    .fee(fee)
+                                    .netAmount(netAmount)
+                                    .previousBalance(senderAccount.getBalance())
+                                    .currentBalance(senderAccount.getBalance().add(netAmount))
+                                    .availableBalance(senderAccount.getBalance())
+                                    .direction(Direction.SEND)
+                                    .referenceCode(null)
+                                    .description(create.getDescription())
+                                    .status(true)
+                                    .build()));
+
+                    if (isPayFee) {
+
+                        detailList.add(TransactionDetail.builder()
+                                .id(new ULID().nextULID())
+                                .account(vaultConfig.getAccountNumber())
+                                .amount(fee)
+                                .fee(BigDecimal.ZERO)
+                                .netAmount(fee)
+                                .previousBalance(masterAccount.getBalance())
+                                .currentBalance(masterAccount.getBalance())
+                                .availableBalance(masterAccount.getBalance())
+                                .direction(Direction.RECEIVE)
+                                .referenceCode(id)
+                                .description(create.getDescription())
+                                .status(true)
+                                .build());
+                    }
+
+                    // Set transaction detail
+                    transaction.setTransactionDetailList(detailList);
+
+                    // Save transaction
+                    transactionRepository.save(transaction);
+
+                    // Update sender account balance (Core banking)
+
+                    // Update master account balance (Core banking)
+
+                    // Update receiver account balance (Napas)
+
+                    // Send event to notification service
+
+                }
+            }
         } catch (Exception e) {
 
-            throw new InvalidParameterException(
+            throw new InvalidParameterException(e instanceof InvalidParameterException ? e.getMessage() :
                     messageSource.getMessage(Constant.CREATE_FAIL, null, LocaleContextHolder.getLocale()));
         }
     }

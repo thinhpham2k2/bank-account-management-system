@@ -62,12 +62,27 @@ public interface TransactionDetailMapper {
     TransactionExtraDTO entityToExtraDTO(TransactionDetail entity);
 
     @Mapping(target = "id", expression = "java(mapId())")
+    @Mapping(target = "transactionType", expression = "java(mapExternalTransactionType(\"EXTERNAL\"))")
     ExternalTransaction createToExternalEntity(CreateExternalDTO create);
 
     @Named("mapId")
     default String mapId() {
 
         return new ULID().nextULID();
+    }
+
+    @Named("mapExternalTransactionType")
+    default TransactionType mapExternalTransactionType(String type) {
+
+        if (type.equals(TransactionType.INTERNAL.name())) {
+
+            return TransactionType.INTERNAL;
+        } else if (type.equals(TransactionType.EXTERNAL.name())) {
+
+            return TransactionType.EXTERNAL;
+        }
+
+        return TransactionType.PAYMENT;
     }
 
     @Named("mapExternalBankName")
@@ -161,17 +176,13 @@ public interface TransactionDetailMapper {
     @Named("mapState")
     default String mapState(Transaction transaction) {
 
-        return transaction.getTransactionStateList().toArray(
-                TransactionState[]::new)[transaction.getTransactionStateList().size() - 1]
-                .getState().toString();
+        return transaction.getTransactionStateList().toArray(TransactionState[]::new)[transaction.getTransactionStateList().size() - 1].getState().toString();
     }
 
     @Named("mapStateDescription")
     default String mapStateDescription(Transaction transaction) {
 
-        return transaction.getTransactionStateList().toArray(
-                TransactionState[]::new)[transaction.getTransactionStateList().size() - 1]
-                .getState().getDescription();
+        return transaction.getTransactionStateList().toArray(TransactionState[]::new)[transaction.getTransactionStateList().size() - 1].getState().getDescription();
     }
 
     @Named("mapEnum")
