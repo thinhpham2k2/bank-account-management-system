@@ -2,8 +2,6 @@ package com.system.transaction_service.config;
 
 import com.system.transaction_service.auditing.ApplicationAuditAware;
 import lombok.RequiredArgsConstructor;
-import net.devh.boot.grpc.server.security.authentication.BasicGrpcAuthenticationReader;
-import net.devh.boot.grpc.server.security.authentication.GrpcAuthenticationReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -49,11 +47,6 @@ public class AppConfig {
     public AuditorAware<String> auditorAware() {
 
         return new ApplicationAuditAware();
-    }
-
-    @Bean
-    public GrpcAuthenticationReader grpcAuthenticationReader(){
-        return new BasicGrpcAuthenticationReader();
     }
 
     @Bean

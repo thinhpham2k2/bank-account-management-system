@@ -90,8 +90,9 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
         try {
 
             // Check OTP (Notification service)
-            Object otpFromRedis = redisTemplate.opsForValue().get(
-                    create.getAccountSender() + create.getAccountReceiver());
+            String key = Constant.CACHE_TRANSACTION_PREFIX + "otp:"
+                    + create.getAccountSender() + create.getAccountReceiver();
+            Object otpFromRedis = redisTemplate.opsForValue().get(key);
 
             if (otpFromRedis == null || !otpFromRedis.toString().equals(create.getOtpCode())) {
 

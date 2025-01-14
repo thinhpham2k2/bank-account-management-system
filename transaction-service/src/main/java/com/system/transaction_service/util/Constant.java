@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Constant implements Serializable {
 
     public static final String BLANK = "";
+    public static final String CACHE_TRANSACTION_PREFIX = "transaction:";
     public static final String NOT_FOUND = "message.not.found";
     public static final String CREATE_SUCCESS = "message.create.success";
     public static final String CREATE_FAIL = "message.create.fail";
@@ -53,4 +54,6 @@ public class Constant implements Serializable {
     public static final String PAYLOAD_TOO_LARGE = "message.payload.too.media";
     public static final String INVALID_OTP_CODE = "message.invalid.otp.code";
     public static final String INSUFFICIENT_BALANCE = "message.insufficient.balance";
+    public static final String SEND_OTP_SUCCESS = "message.send.otp.success";
+    public static final String SEND_OTP_FAILED = "message.send.otp.failed";
 }

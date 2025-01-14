@@ -7,8 +7,6 @@ services:
       - "8000:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=12345
-    volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "database-mysql" ]
       interval: 7s
@@ -119,6 +117,20 @@ services:
       - IPC_LOCK
     command: [ "sh", "-c", "vault server -dev -dev-listen-address=0.0.0.0:8200 
     & sleep 5 && /init-vault.sh && tail -f /dev/null" ]
+    networks:
+      - microservice_networks
+
+  zookeeper:
+    image: zookeeper:latest
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
     networks:
       - microservice_networks
 

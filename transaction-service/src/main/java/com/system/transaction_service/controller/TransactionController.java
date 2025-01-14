@@ -126,7 +126,7 @@ public class TransactionController {
     @PostMapping("/otp-code")
     @Operation(summary = "Send OTP code to email")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content =
+            @ApiResponse(responseCode = "200", description = "Success", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
@@ -143,8 +143,8 @@ public class TransactionController {
         // Send OTP code
         notificationService.sendOtpCode(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
-                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body(
+                messageSource.getMessage(Constant.SEND_OTP_SUCCESS, null, LocaleContextHolder.getLocale()));
     }
 
     @PostMapping("/external")

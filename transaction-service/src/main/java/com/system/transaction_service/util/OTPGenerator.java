@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 public class OTPGenerator implements Serializable {
-
-
+    
     public static String generateOTP(int len) {
 
         String otp = "";
