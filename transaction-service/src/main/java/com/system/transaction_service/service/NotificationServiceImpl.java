@@ -39,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (isSucceed) {
 
             String key = Constant.CACHE_TRANSACTION_PREFIX + "otp:"
-                    + request.getAccountSender() + request.getAccountReceiver();
+                    + request.getSenderAccount() + request.getReceiverAccount();
             redisTemplate.opsForValue().set(key, otpCode);
             redisTemplate.opsForValue().getAndExpire(key, Duration.ofMillis(60000L));
         } else {

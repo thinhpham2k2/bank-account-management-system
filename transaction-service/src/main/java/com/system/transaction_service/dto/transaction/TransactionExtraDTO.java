@@ -36,16 +36,16 @@ public class TransactionExtraDTO implements Serializable {
     private String typeName;
 
     // Transaction
-    private String accountSenderId;
-    private String accountSender;
-    private String accountSenderType;
-    private String accountSenderTypeName;
-    private String accountSenderName;
-    private String accountReceiverId;
-    private String accountReceiver;
-    private String accountReceiverType;
-    private String accountReceiverTypeName;
-    private String accountReceiverName;
+    private String senderAccountId;
+    private String senderAccount;
+    private String senderAccountType;
+    private String senderAccountTypeName;
+    private String senderAccountName;
+    private String receiverAccountId;
+    private String receiverAccount;
+    private String receiverAccountType;
+    private String receiverAccountTypeName;
+    private String receiverAccountName;
     private String transactionCode;
     private String feePayer;
     private String feePayerName;

@@ -87,8 +87,8 @@ public class AccessLogFilter extends OncePerRequestFilter {
                                 . Response body (Content type: {}):
                                 {}""",
                         remoteIpAddress, requestWrapper.getMethod(), requestWrapper.getRequestURI(), parameter,
-                        responseWrapper.getStatus(), time,
-                        requestContentType, requestBody, responseContentType, responseBody);
+                        responseWrapper.getStatus(), time, requestContentType, requestBody, responseContentType,
+                        responseBody);
                 requestWrapper.getInputStream();
                 responseWrapper.copyBodyToResponse();
             }

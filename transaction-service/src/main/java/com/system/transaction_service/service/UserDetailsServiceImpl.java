@@ -1,6 +1,7 @@
 package com.system.transaction_service.service;
 
 import com.system.transaction_service.dto.user.UserDetailCustom;
+import com.system.transaction_service.mapper.UserDetailMapper;
 import com.system.transaction_service.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -18,9 +19,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final MessageSource messageSource;
 
+    private final UserDetailMapper userDetailMapper;
+
+//    @DubboReference
+//    private final CustomerDubboService customerDubboService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
+//        Optional<UserDetailCustom> result = Optional.ofNullable(
+//                userDetailMapper.detailToDetailCustom(customerDubboService.loadUserByUsername(username)));
         Optional<UserDetailCustom> result =
                 Optional.of(UserDetailCustom.builder()
                         .username("admin")
@@ -28,6 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         .id("Unknown")
                         .role("CUSTOMER")
                         .build());
+
         return result
                 .orElseThrow(() -> new UsernameNotFoundException(
                         messageSource.getMessage(Constant.INVALID_ACCOUNT, null, LocaleContextHolder.getLocale())));

@@ -20,14 +20,14 @@ public class CreateExternalDTO implements Serializable {
 
     private String napasCode;
     private String swiftCode;
-    private String accountSenderId;
-    private String accountSender;
-    private AccountType accountSenderType;
-    private String accountSenderName;
-    private String accountReceiverId;
-    private String accountReceiver;
-    private AccountType accountReceiverType;
-    private String accountReceiverName;
+    private String senderAccountId;
+    private String senderAccount;
+    private AccountType senderAccountType;
+    private String senderAccountName;
+    private String receiverAccountId;
+    private String receiverAccount;
+    private AccountType receiverAccountType;
+    private String receiverAccountName;
     private String transactionCode;
     private BigDecimal amount;
     private BigDecimal fee;

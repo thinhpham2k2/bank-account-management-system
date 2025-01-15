@@ -8,10 +8,12 @@ import com.system.transaction_service.dto.transaction.*;
 import com.system.transaction_service.entity.ExternalTransaction;
 import com.system.transaction_service.entity.InternalTransaction;
 import com.system.transaction_service.entity.TransactionDetail;
+import com.system.transaction_service.entity.TransactionState;
 import com.system.transaction_service.mapper.TransactionDetailMapper;
 import com.system.transaction_service.repository.ExternalBankRepository;
 import com.system.transaction_service.repository.TransactionDetailRepository;
 import com.system.transaction_service.repository.TransactionRepository;
+import com.system.transaction_service.repository.TransactionStateRepository;
 import com.system.transaction_service.service.interfaces.PagingService;
 import com.system.transaction_service.service.interfaces.TransactionDetailService;
 import com.system.transaction_service.util.Constant;
@@ -32,6 +34,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -54,6 +57,8 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
     private final TransactionRepository transactionRepository;
 
     private final ExternalBankRepository externalBankRepository;
+
+    private final TransactionStateRepository transactionStateRepository;
 
     @Override
     public TransactionExtraDTO findById(String id) {
@@ -91,7 +96,7 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
 
             // Check OTP (Notification service)
             String key = Constant.CACHE_TRANSACTION_PREFIX + "otp:"
-                    + create.getAccountSender() + create.getAccountReceiver();
+                    + create.getSenderAccount() + create.getReceiverAccount();
             Object otpFromRedis = redisTemplate.opsForValue().get(key);
 
             if (otpFromRedis == null || !otpFromRedis.toString().equals(create.getOtpCode())) {
@@ -132,7 +137,7 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
 
                     BigDecimal netAmount = amount.add(fee.negate());
 
-                    if (senderAccount.getBalance().compareTo(netAmount.abs()) < 0) {
+                    if (senderAccount.getAvailableBalance().compareTo(netAmount.abs()) < 0) {
 
                         throw new InvalidParameterException(
                                 messageSource.getMessage(
@@ -143,13 +148,13 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
                     List<TransactionDetail> detailList = new ArrayList<>(List.of(
                             TransactionDetail.builder()
                                     .id(id)
-                                    .account(create.getAccountSender())
+                                    .account(create.getSenderAccount())
                                     .amount(amount)
                                     .fee(fee)
                                     .netAmount(netAmount)
                                     .previousBalance(senderAccount.getBalance())
                                     .currentBalance(senderAccount.getBalance().add(netAmount))
-                                    .availableBalance(senderAccount.getBalance())
+                                    .availableBalance(senderAccount.getAvailableBalance().add(netAmount))
                                     .direction(Direction.SEND)
                                     .referenceCode(null)
                                     .description(create.getDescription())
@@ -165,8 +170,8 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
                                 .fee(BigDecimal.ZERO)
                                 .netAmount(fee)
                                 .previousBalance(masterAccount.getBalance())
-                                .currentBalance(masterAccount.getBalance())
-                                .availableBalance(masterAccount.getBalance())
+                                .currentBalance(masterAccount.getBalance().add(fee))
+                                .availableBalance(masterAccount.getAvailableBalance().add(fee))
                                 .direction(Direction.RECEIVE)
                                 .referenceCode(id)
                                 .description(create.getDescription())
@@ -177,14 +182,34 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
                     // Set transaction detail
                     transaction.setTransactionDetailList(detailList);
 
+                    // Set transaction state
+                    List<TransactionState> stateList = List.of(
+                            TransactionState.builder()
+                                    .id(new ULID().nextULID())
+                                    .state(State.PENDING)
+                                    .description(State.PENDING.getDescription())
+                                    .status(true)
+                                    .build());
+                    transaction.setTransactionStateList(stateList);
+
                     // Save transaction
-                    transactionRepository.save(transaction);
+                    ExternalTransaction externalTransaction = transactionRepository.save(transaction);
 
                     // Update sender account balance (Core banking)
 
                     // Update master account balance (Core banking)
 
                     // Update receiver account balance (Napas)
+                    boolean isSuccess = new Random().nextBoolean();
+
+                    // Update transaction state
+                    transactionStateRepository.save(TransactionState.builder()
+                            .id(new ULID().nextULID())
+                            .transaction(externalTransaction)
+                            .state(isSuccess ? State.COMPLETED : State.FAILED)
+                            .description(isSuccess ? State.COMPLETED.getDescription() : State.FAILED.getDescription())
+                            .status(true)
+                            .build());
 
                     // Send event to notification service
 

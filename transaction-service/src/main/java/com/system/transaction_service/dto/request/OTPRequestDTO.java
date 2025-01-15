@@ -14,6 +14,6 @@ import java.io.Serializable;
 public class OTPRequestDTO implements Serializable {
 
     private String email;
-    private String accountSender;
-    private String accountReceiver;
+    private String senderAccount;
+    private String receiverAccount;
 }

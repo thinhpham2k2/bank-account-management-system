@@ -24,10 +24,10 @@ public interface TransactionDetailRepository extends JpaRepository<TransactionDe
             "AND (:#{#initiatorList.size()} = 0 OR d.transaction.initiator IN ?4) " +
             "AND (:#{#methodList.size()} = 0 OR d.transaction.method IN ?5) " +
             "AND (:#{#transactionTypeList.size()} = 0 OR d.transaction.transactionType IN ?6) " +
-            "AND (d.transaction.accountSender LIKE %?7% " +
-            "OR d.transaction.accountSenderName LIKE %?7% " +
-            "OR d.transaction.accountReceiver LIKE %?7% " +
-            "OR d.transaction.accountReceiverName LIKE %?7% " +
+            "AND (d.transaction.senderAccount LIKE %?7% " +
+            "OR d.transaction.senderAccountName LIKE %?7% " +
+            "OR d.transaction.receiverAccount LIKE %?7% " +
+            "OR d.transaction.receiverAccountName LIKE %?7% " +
             "OR d.transaction.note LIKE %?7% " +
             "OR d.transaction.description LIKE %?7%)" +
             "AND d.transaction.amount BETWEEN ?8 AND ?9")

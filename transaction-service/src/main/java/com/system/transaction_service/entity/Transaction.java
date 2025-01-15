@@ -21,38 +21,38 @@ import java.util.List;
 @Entity(name = "Transaction")
 @Table(name = "tbl_transaction",
         indexes = {
-                @Index(name = "idx_sender_receiver_name", columnList = "account_sender_name, account_receiver_name, note")
+                @Index(name = "idx_sender_receiver_name", columnList = "sender_account_name, receiver_account_name, note")
         }
 )
 @EqualsAndHashCode(callSuper = true)
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Transaction extends BaseEntity implements Serializable {
 
-    @Column(name = "account_sender_id")
-    private String accountSenderId;
+    @Column(name = "sender_account_id")
+    private String senderAccountId;
 
-    @Column(name = "account_sender")
-    private String accountSender;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "account_sender_type")
-    private AccountType accountSenderType;
-
-    @Column(name = "account_sender_name")
-    private String accountSenderName;
-
-    @Column(name = "account_receiver_id")
-    private String accountReceiverId;
-
-    @Column(name = "account_receiver")
-    private String accountReceiver;
+    @Column(name = "sender_account")
+    private String senderAccount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_receiver_type")
-    private AccountType accountReceiverType;
+    @Column(name = "sender_account_type")
+    private AccountType senderAccountType;
 
-    @Column(name = "account_receiver_name")
-    private String accountReceiverName;
+    @Column(name = "sender_account_name")
+    private String senderAccountName;
+
+    @Column(name = "receiver_account_id")
+    private String receiverAccountId;
+
+    @Column(name = "receiver_account")
+    private String receiverAccount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "receiver_account_type")
+    private AccountType receiverAccountType;
+
+    @Column(name = "receiver_account_name")
+    private String receiverAccountName;
 
     @Column(name = "transaction_code")
     private String transactionCode;
