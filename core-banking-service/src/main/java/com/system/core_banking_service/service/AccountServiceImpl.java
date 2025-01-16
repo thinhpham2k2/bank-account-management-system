@@ -58,9 +58,8 @@ public class AccountServiceImpl implements AccountService {
             return accountMapper.entityToDTO(accountRepository.save(account));
         } catch (Exception e) {
 
-            throw new InvalidParameterException(
-                    messageSource.getMessage(
-                            Constant.CREATE_FAIL, null, LocaleContextHolder.getLocale()));
+            throw new InvalidParameterException(e instanceof InvalidParameterException ? e.getMessage() :
+                    messageSource.getMessage(Constant.CREATE_FAIL, null, LocaleContextHolder.getLocale()));
         }
     }
 

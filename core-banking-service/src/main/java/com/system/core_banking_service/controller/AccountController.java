@@ -72,7 +72,8 @@ public class AccountController {
     public ResponseEntity<?> create(@RequestBody @Validated CreateAccountDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.create(create));
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(accountService.create(create));
     }
 
     @PutMapping("/{account}")

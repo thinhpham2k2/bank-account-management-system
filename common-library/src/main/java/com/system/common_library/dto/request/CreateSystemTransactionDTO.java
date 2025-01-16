@@ -20,14 +20,17 @@ public class CreateSystemTransactionDTO implements Serializable {
 
     @NotNull(message = "{" + Constant.ACCOUNT_NUMBER_REQUIRE + "}")
     @Size(min = 2, max = 255, message = "{" + Constant.ACCOUNT_NUMBER_SIZE + "}")
-    private String accountNumber;
+    private String customerAccountNumber;
+
+    @Range(min = -1000000000, max = 1000000000, message = "{" + Constant.INVALID_AMOUNT + "}")
+    private BigDecimal customerAmount;
 
     @NotNull(message = "{" + Constant.ACCOUNT_NUMBER_REQUIRE + "}")
     @Size(min = 2, max = 255, message = "{" + Constant.ACCOUNT_NUMBER_SIZE + "}")
     private String masterAccountNumber;
 
-    @Range(min = 0, max = 1000000000, message = "{" + Constant.INVALID_AMOUNT + "}")
-    private BigDecimal amount;
+    @Range(min = -1000000000, max = 1000000000, message = "{" + Constant.INVALID_AMOUNT + "}")
+    private BigDecimal masterAmount;
 
     private String note;
 

@@ -57,7 +57,8 @@ public class TransactionServiceImpl implements TransactionService {
                     Optional<Account> master = accountRepository.findByAccountNumberAndStatus
                             (create.getMasterAccountNumber(), true);
 
-                    if (master.isPresent()) {
+                    // Check master account
+                    if (master.isPresent() && master.get().getIsActive()) {
 
                         BigDecimal fee = create.getFee();
 
@@ -108,7 +109,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .amount(amount)
                         .previousBalance(account.get().getBalance())
                         .currentBalance(account.get().getBalance().add(amount))
-                        .availableBalance(account.get().getAvailableBalance().add(amount))
+                        .availableBalance(balance.add(amount))
                         .direction(isSender ? Direction.RECEIVE : Direction.SEND)
                         .note(create.getNote())
                         .description(create.getDescription())
@@ -119,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
                 // Update account balance
                 account.get().setLastTransactionDate(LocalDateTime.now());
                 account.get().setBalance(account.get().getBalance().add(amount));
-                account.get().setAvailableBalance(account.get().getAvailableBalance().add(amount));
+                account.get().setAvailableBalance(balance.add(amount));
                 accountRepository.save(account.get());
 
                 return transactionMapper.entityToDTO(transactionRepository.save(transaction));
@@ -163,7 +164,8 @@ public class TransactionServiceImpl implements TransactionService {
                         Optional<Account> master = accountRepository.findByAccountNumberAndStatus
                                 (create.getMasterAccountNumber(), true);
 
-                        if (master.isPresent()) {
+                        // Check master account
+                        if (master.isPresent() && master.get().getIsActive()) {
 
                             BigDecimal fee = create.getFee();
 
@@ -216,7 +218,7 @@ public class TransactionServiceImpl implements TransactionService {
                             .amount(senderAmount)
                             .previousBalance(sender.get().getBalance())
                             .currentBalance(sender.get().getBalance().add(senderAmount))
-                            .availableBalance(sender.get().getAvailableBalance().add(senderAmount))
+                            .availableBalance(senderBalance.add(senderAmount))
                             .direction(Direction.SEND)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -231,7 +233,7 @@ public class TransactionServiceImpl implements TransactionService {
                             .amount(receiverAmount)
                             .previousBalance(receiver.get().getBalance())
                             .currentBalance(receiver.get().getBalance().add(receiverAmount))
-                            .availableBalance(receiver.get().getAvailableBalance().add(receiverAmount))
+                            .availableBalance(receiverBalance.add(receiverAmount))
                             .direction(Direction.RECEIVE)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -244,12 +246,12 @@ public class TransactionServiceImpl implements TransactionService {
                     // Update sender account balance
                     sender.get().setLastTransactionDate(LocalDateTime.now());
                     sender.get().setBalance(sender.get().getBalance().add(senderAmount));
-                    sender.get().setAvailableBalance(sender.get().getAvailableBalance().add(senderAmount));
+                    sender.get().setAvailableBalance(senderBalance.add(senderAmount));
 
                     // Update receiver account balance
                     receiver.get().setLastTransactionDate(LocalDateTime.now());
                     receiver.get().setBalance(receiver.get().getBalance().add(receiverAmount));
-                    receiver.get().setAvailableBalance(receiver.get().getAvailableBalance().add(receiverAmount));
+                    receiver.get().setAvailableBalance(receiverBalance.add(receiverAmount));
 
                     accountRepository.saveAll(List.of(sender.get(), receiver.get()));
 
@@ -276,6 +278,114 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDTO createSystem(CreateSystemTransactionDTO create) {
-        return null;
+
+        try {
+
+            if (create.getCustomerAmount().negate().compareTo(create.getMasterAmount()) == 0) {
+
+                throw new InvalidParameterException(
+                        messageSource.getMessage(
+                                Constant.INVALID_BALANCED_TRANSACTION, null, LocaleContextHolder.getLocale()));
+            }
+
+            boolean isSender = create.getCustomerAmount().compareTo(BigDecimal.ZERO) < 0;
+
+            // Get customer account
+            Optional<Account> customer = accountRepository.findByAccountNumberAndStatus
+                    (create.getCustomerAccountNumber(), true);
+
+            // Check customer account
+            if (customer.isPresent() && customer.get().getIsActive()) {
+
+                // Get master account
+                Optional<Account> master = accountRepository.findByAccountNumberAndStatus
+                        (create.getMasterAccountNumber(), true);
+
+                // Check master account
+                if (master.isPresent() && master.get().getIsActive()) {
+
+                    BigDecimal customerAmount = create.getCustomerAmount();
+                    BigDecimal masterAmount = create.getMasterAmount();
+
+                    BigDecimal customerBalance = customer.get().getAvailableBalance();
+                    BigDecimal masterBalance = master.get().getAvailableBalance();
+
+                    // Check balance
+                    if (isSender && customerBalance.compareTo(customerAmount.negate()) < 0) {
+
+                        throw new InvalidParameterException(
+                                messageSource.getMessage(
+                                        Constant.INSUFFICIENT_BALANCE, null, LocaleContextHolder.getLocale()));
+                    } else if (masterBalance.compareTo(masterAmount.negate()) < 0) {
+
+                        throw new InvalidParameterException(
+                                messageSource.getMessage(
+                                        Constant.INSUFFICIENT_MASTER_BALANCE, null, LocaleContextHolder.getLocale()));
+                    }
+
+                    // Create customer transaction
+                    Transaction customerTransaction = Transaction.builder()
+                            .id(new ULID().nextULID())
+                            .account(customer.get())
+                            .amount(customerAmount)
+                            .previousBalance(customer.get().getBalance())
+                            .currentBalance(customer.get().getBalance().add(customerAmount))
+                            .availableBalance(customerBalance.add(customerAmount))
+                            .direction(isSender ? Direction.SEND : Direction.RECEIVE)
+                            .note(create.getNote())
+                            .description(create.getDescription())
+                            .state(true)
+                            .status(true)
+                            .build();
+
+                    // Create master transaction
+                    Transaction masterTransaction = Transaction.builder()
+                            .id(new ULID().nextULID())
+                            .account(master.get())
+                            .amount(masterAmount)
+                            .previousBalance(master.get().getBalance())
+                            .currentBalance(master.get().getBalance().add(masterAmount))
+                            .availableBalance(masterBalance.add(masterAmount))
+                            .direction(!isSender ? Direction.SEND : Direction.RECEIVE)
+                            .note(create.getNote())
+                            .description(create.getDescription())
+                            .state(true)
+                            .status(true)
+                            .build();
+
+                    transactionRepository.save(masterTransaction);
+
+                    // Update customer account balance
+                    customer.get().setLastTransactionDate(LocalDateTime.now());
+                    customer.get().setBalance(customer.get().getBalance().add(customerAmount));
+                    customer.get().setAvailableBalance(customerBalance.add(customerAmount));
+
+                    // Update master account balance
+                    master.get().setLastTransactionDate(LocalDateTime.now());
+                    master.get().setBalance(master.get().getBalance().add(masterAmount));
+                    master.get().setAvailableBalance(masterBalance.add(masterAmount));
+
+                    accountRepository.saveAll(List.of(customer.get(), master.get()));
+
+                    return transactionMapper.entityToDTO(transactionRepository.save(customerTransaction));
+
+                } else {
+
+                    throw new InvalidParameterException(
+                            messageSource.getMessage(
+                                    Constant.INVALID_MASTER_ACCOUNT, null, LocaleContextHolder.getLocale()));
+                }
+            } else {
+
+                throw new InvalidParameterException(
+                        messageSource.getMessage(
+                                isSender ? Constant.INVALID_SENDER_ACCOUNT : Constant.INVALID_RECEIVER_ACCOUNT,
+                                null, LocaleContextHolder.getLocale()));
+            }
+        } catch (Exception e) {
+
+            throw new InvalidParameterException(e instanceof InvalidParameterException ? e.getMessage() :
+                    messageSource.getMessage(Constant.CREATE_FAIL, null, LocaleContextHolder.getLocale()));
+        }
     }
 }

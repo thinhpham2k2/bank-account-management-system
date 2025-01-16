@@ -18,10 +18,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 @RestControllerAdvice
@@ -81,14 +81,14 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 
-        Map<String, List<String>> errorMap = new HashMap<>();
+        Map<String, Set<String>> errorMap = new HashMap<>();
         BindingResult bindingResult = ex.getBindingResult();
 
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             String fieldName = fieldError.getField();
             String errorMessage = fieldError.getDefaultMessage();
 
-            errorMap.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
+            errorMap.computeIfAbsent(fieldName, k -> new HashSet<>()).add(errorMessage);
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)

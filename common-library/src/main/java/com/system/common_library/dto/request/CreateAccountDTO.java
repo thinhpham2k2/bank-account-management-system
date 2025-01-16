@@ -46,6 +46,7 @@ public class CreateAccountDTO implements Serializable {
     @Size(min = 1, max = 255, message = "{" + Constant.CURRENCY_SIZE + "}")
     private String currency;
 
+    @AccountTypeConstraint
     @NotNull(message = "{" + Constant.IS_ACTIVE_REQUIRE + "}")
     private Boolean isActive;
 
