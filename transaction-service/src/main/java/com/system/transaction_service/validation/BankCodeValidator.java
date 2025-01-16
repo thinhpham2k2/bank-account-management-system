@@ -27,7 +27,6 @@ public class BankCodeValidator implements ConstraintValidator<BankCodeConstraint
 
         try {
 
-            constraintValidatorContext.disableDefaultConstraintViolation();
             if (externalBankRepository.existsByCode(value.toString())) {
 
                 constraintValidatorContext

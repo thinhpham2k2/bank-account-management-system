@@ -1,8 +1,13 @@
 package com.system.transaction_service.service.interfaces;
 
+import com.system.common_library.dto.transaction.CreateExternalDTO;
+import com.system.common_library.dto.transaction.CreateInternalDTO;
+import com.system.common_library.dto.transaction.CreatePaymentDTO;
+import com.system.common_library.dto.transaction.CreateSystemDTO;
 import com.system.common_library.enums.*;
 import com.system.transaction_service.dto.response.PagedDTO;
-import com.system.transaction_service.dto.transaction.*;
+import com.system.transaction_service.dto.transaction.TransactionDTO;
+import com.system.transaction_service.dto.transaction.TransactionExtraDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,4 +26,6 @@ public interface TransactionDetailService {
     void createInternal(CreateInternalDTO create);
 
     void createPayment(CreatePaymentDTO create);
+
+    void createSystem(CreateSystemDTO create);
 }

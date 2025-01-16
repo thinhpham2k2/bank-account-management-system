@@ -25,7 +25,6 @@ public class FileValidator implements ConstraintValidator<FileConstraint, Object
 
         try {
 
-            constraintValidatorContext.disableDefaultConstraintViolation();
             if (value instanceof MultipartFile file) {
 
                 if (file.isEmpty()) {

@@ -52,6 +52,7 @@ public class AccountTypeValidator implements ConstraintValidator<AccountTypeCons
                     .buildConstraintViolationWithTemplate(messageSource.getMessage
                             (Constant.INVALID_ACCOUNT_TYPE, null, LocaleContextHolder.getLocale()))
                     .addConstraintViolation();
+
             return false;
         }
     }

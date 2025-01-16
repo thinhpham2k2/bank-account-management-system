@@ -22,4 +22,6 @@ public class Constant implements Serializable {
     public static final String INSUFFICIENT_BALANCE = "message.insufficient.balance";
     public static final String INSUFFICIENT_MASTER_BALANCE = "message.master.insufficient.balance";
     public static final String INVALID_BALANCED_TRANSACTION = "message.invalid.balanced.transaction";
+    public static final String INVALID_AMOUNT = "message.invalid.amount";
+    public static final String INVALID_TOTAL_AMOUNT = "message.invalid.total.amount";
 }

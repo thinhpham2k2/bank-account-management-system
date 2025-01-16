@@ -62,14 +62,12 @@ public class TransactionController {
     public ResponseEntity<?> createInternal(@RequestBody @Validated CreateInternalTransactionDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        transactionService.createInternal(create);
-
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                 .body(transactionService.createInternal(create));
     }
 
     @PostMapping("/system")
-    @Operation(summary = "Create internal transaction")
+    @Operation(summary = "Create system transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
@@ -80,8 +78,6 @@ public class TransactionController {
     })
     public ResponseEntity<?> createSystem(@RequestBody @Validated CreateSystemTransactionDTO create)
             throws MethodArgumentTypeMismatchException {
-
-        transactionService.createSystem(create);
 
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                 .body(transactionService.createSystem(create));

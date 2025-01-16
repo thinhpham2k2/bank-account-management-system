@@ -27,7 +27,6 @@ public class SwiftCodeValidator implements ConstraintValidator<SwiftCodeConstrai
 
         try {
 
-            constraintValidatorContext.disableDefaultConstraintViolation();
             if (externalBankRepository.existsBySwiftCode(value.toString())) {
 
                 constraintValidatorContext

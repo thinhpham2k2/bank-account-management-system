@@ -3,6 +3,7 @@ package com.system.common_library.dto.request;
 import com.system.common_library.enums.AccountType;
 import com.system.common_library.util.Constant;
 import com.system.common_library.validation.interfaces.AccountTypeConstraint;
+import com.system.common_library.validation.interfaces.AvailableBalanceConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@AvailableBalanceConstraint
 public class CreateAccountDTO implements Serializable {
 
     @NotNull(message = "{" + Constant.ACCOUNT_ID_REQUIRE + "}")
@@ -46,7 +48,6 @@ public class CreateAccountDTO implements Serializable {
     @Size(min = 1, max = 255, message = "{" + Constant.CURRENCY_SIZE + "}")
     private String currency;
 
-    @AccountTypeConstraint
     @NotNull(message = "{" + Constant.IS_ACTIVE_REQUIRE + "}")
     private Boolean isActive;
 

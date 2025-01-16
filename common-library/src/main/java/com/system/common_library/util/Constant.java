@@ -10,6 +10,7 @@ public class Constant implements Serializable {
     public static final String ACCOUNT_NUMBER_SIZE = "message.account.number.size";
     public static final String INVALID_BALANCE = "message.invalid.balance";
     public static final String INVALID_AVAILABLE_BALANCE = "message.invalid.available.balance";
+    public static final String EXCEED_AVAILABLE_BALANCE = "message.exceed.available.balance";
     public static final String CUSTOMER_ID_REQUIRE = "message.customer.id.require";
     public static final String CUSTOMER_ID_SIZE = "message.customer.id.size";
     public static final String CURRENCY_REQUIRE = "message.currency.require";

@@ -5,6 +5,7 @@ import com.system.common_library.dto.request.CreateInternalTransactionDTO;
 import com.system.common_library.dto.request.CreateSystemTransactionDTO;
 import com.system.common_library.dto.response.TransactionDTO;
 import com.system.common_library.enums.Direction;
+import com.system.common_library.enums.TransactionType;
 import com.system.core_banking_service.entity.Account;
 import com.system.core_banking_service.entity.Transaction;
 import com.system.core_banking_service.mapper.TransactionMapper;
@@ -43,13 +44,22 @@ public class TransactionServiceImpl implements TransactionService {
 
         try {
 
+            // Check amount
+            if (create.getAmount().compareTo(BigDecimal.ZERO) == 0) {
+
+                throw new InvalidParameterException(
+                        messageSource.getMessage(Constant.INVALID_AMOUNT, null, LocaleContextHolder.getLocale()));
+            }
+
+            // Generate reference code
+            String referenceCode = new ULID().nextULID();
+
             // Get account
             Optional<Account> account = accountRepository.findByAccountNumberAndStatus
                     (create.getAccountNumber(), true);
 
             // Check account
-            if (account.isPresent() && account.get().getIsActive()
-                    && create.getAmount().compareTo(BigDecimal.ZERO) != 0) {
+            if (account.isPresent() && account.get().getIsActive()) {
 
                 if (create.getFee().compareTo(BigDecimal.ZERO) > 0) {
 
@@ -63,13 +73,15 @@ public class TransactionServiceImpl implements TransactionService {
                         BigDecimal fee = create.getFee();
 
                         // Create master transaction
-                        Transaction transaction = Transaction.builder()
+                        Transaction masterTransaction = Transaction.builder()
                                 .id(new ULID().nextULID())
                                 .account(master.get())
                                 .amount(fee)
                                 .previousBalance(master.get().getBalance())
                                 .currentBalance(master.get().getBalance().add(fee))
                                 .availableBalance(master.get().getAvailableBalance().add(fee))
+                                .referenceCode(referenceCode)
+                                .type(TransactionType.EXTERNAL)
                                 .direction(Direction.RECEIVE)
                                 .note(create.getNote())
                                 .description(create.getDescription())
@@ -77,10 +89,13 @@ public class TransactionServiceImpl implements TransactionService {
                                 .status(true)
                                 .build();
 
+                        transactionRepository.save(masterTransaction);
+
                         // Update master account balance
                         master.get().setLastTransactionDate(LocalDateTime.now());
                         master.get().setBalance(master.get().getBalance().add(fee));
                         master.get().setAvailableBalance(master.get().getAvailableBalance().add(fee));
+                        master.get().setTotalIncome(master.get().getTotalIncome().add(fee));
                         accountRepository.save(master.get());
                     } else {
 
@@ -110,7 +125,9 @@ public class TransactionServiceImpl implements TransactionService {
                         .previousBalance(account.get().getBalance())
                         .currentBalance(account.get().getBalance().add(amount))
                         .availableBalance(balance.add(amount))
-                        .direction(isSender ? Direction.RECEIVE : Direction.SEND)
+                        .referenceCode(referenceCode)
+                        .type(TransactionType.EXTERNAL)
+                        .direction(isSender ? Direction.SEND : Direction.RECEIVE)
                         .note(create.getNote())
                         .description(create.getDescription())
                         .state(true)
@@ -121,6 +138,14 @@ public class TransactionServiceImpl implements TransactionService {
                 account.get().setLastTransactionDate(LocalDateTime.now());
                 account.get().setBalance(account.get().getBalance().add(amount));
                 account.get().setAvailableBalance(balance.add(amount));
+                if (isSender) {
+
+                    account.get().setTotalExpenditure(account.get().getTotalExpenditure().add(amount));
+                } else {
+
+                    account.get().setTotalIncome(account.get().getTotalIncome().add(amount));
+                }
+
                 accountRepository.save(account.get());
 
                 return transactionMapper.entityToDTO(transactionRepository.save(transaction));
@@ -142,21 +167,31 @@ public class TransactionServiceImpl implements TransactionService {
 
         try {
 
+            // Check amount
+            if (create.getSenderAmount().add(create.getReceiverAmount()).add(create.getFee())
+                    .compareTo(BigDecimal.ZERO) != 0) {
+
+                throw new InvalidParameterException(
+                        messageSource.getMessage(Constant.INVALID_TOTAL_AMOUNT,
+                                null, LocaleContextHolder.getLocale()));
+            }
+
+            // Generate reference code
+            String referenceCode = new ULID().nextULID();
+
             // Get sender account
             Optional<Account> sender = accountRepository.findByAccountNumberAndStatus
                     (create.getSenderAccountNumber(), true);
 
             // Check sender account
-            if (sender.isPresent() && sender.get().getIsActive()
-                    && create.getSenderAmount().compareTo(BigDecimal.ZERO) < 0) {
+            if (sender.isPresent() && sender.get().getIsActive()) {
 
                 // Get receiver account
                 Optional<Account> receiver = accountRepository.findByAccountNumberAndStatus
                         (create.getReceiverAccountNumber(), true);
 
                 // Check receiver account
-                if (receiver.isPresent() && receiver.get().getIsActive()
-                        && create.getReceiverAmount().compareTo(BigDecimal.ZERO) > 0) {
+                if (receiver.isPresent() && receiver.get().getIsActive()) {
 
                     if (create.getFee().compareTo(BigDecimal.ZERO) > 0) {
 
@@ -170,13 +205,15 @@ public class TransactionServiceImpl implements TransactionService {
                             BigDecimal fee = create.getFee();
 
                             // Create master transaction
-                            Transaction transaction = Transaction.builder()
+                            Transaction masterTransaction = Transaction.builder()
                                     .id(new ULID().nextULID())
                                     .account(master.get())
                                     .amount(fee)
                                     .previousBalance(master.get().getBalance())
                                     .currentBalance(master.get().getBalance().add(fee))
                                     .availableBalance(master.get().getAvailableBalance().add(fee))
+                                    .referenceCode(referenceCode)
+                                    .type(TransactionType.INTERNAL)
                                     .direction(Direction.RECEIVE)
                                     .note(create.getNote())
                                     .description(create.getDescription())
@@ -184,10 +221,13 @@ public class TransactionServiceImpl implements TransactionService {
                                     .status(true)
                                     .build();
 
+                            transactionRepository.save(masterTransaction);
+
                             // Update master account balance
                             master.get().setLastTransactionDate(LocalDateTime.now());
                             master.get().setBalance(master.get().getBalance().add(fee));
                             master.get().setAvailableBalance(master.get().getAvailableBalance().add(fee));
+                            master.get().setTotalIncome(master.get().getTotalIncome().add(fee));
                             accountRepository.save(master.get());
                         } else {
 
@@ -219,6 +259,8 @@ public class TransactionServiceImpl implements TransactionService {
                             .previousBalance(sender.get().getBalance())
                             .currentBalance(sender.get().getBalance().add(senderAmount))
                             .availableBalance(senderBalance.add(senderAmount))
+                            .referenceCode(referenceCode)
+                            .type(TransactionType.INTERNAL)
                             .direction(Direction.SEND)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -234,6 +276,8 @@ public class TransactionServiceImpl implements TransactionService {
                             .previousBalance(receiver.get().getBalance())
                             .currentBalance(receiver.get().getBalance().add(receiverAmount))
                             .availableBalance(receiverBalance.add(receiverAmount))
+                            .referenceCode(referenceCode)
+                            .type(TransactionType.INTERNAL)
                             .direction(Direction.RECEIVE)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -247,11 +291,13 @@ public class TransactionServiceImpl implements TransactionService {
                     sender.get().setLastTransactionDate(LocalDateTime.now());
                     sender.get().setBalance(sender.get().getBalance().add(senderAmount));
                     sender.get().setAvailableBalance(senderBalance.add(senderAmount));
+                    sender.get().setTotalExpenditure(sender.get().getTotalExpenditure().add(senderAmount));
 
                     // Update receiver account balance
                     receiver.get().setLastTransactionDate(LocalDateTime.now());
                     receiver.get().setBalance(receiver.get().getBalance().add(receiverAmount));
                     receiver.get().setAvailableBalance(receiverBalance.add(receiverAmount));
+                    receiver.get().setTotalIncome(receiver.get().getTotalIncome().add(receiverAmount));
 
                     accountRepository.saveAll(List.of(sender.get(), receiver.get()));
 
@@ -281,12 +327,20 @@ public class TransactionServiceImpl implements TransactionService {
 
         try {
 
-            if (create.getCustomerAmount().negate().compareTo(create.getMasterAmount()) == 0) {
+            if (create.getCustomerAmount().negate().compareTo(create.getMasterAmount()) != 0) {
 
                 throw new InvalidParameterException(
                         messageSource.getMessage(
                                 Constant.INVALID_BALANCED_TRANSACTION, null, LocaleContextHolder.getLocale()));
+            } else if (create.getCustomerAmount().compareTo(BigDecimal.ZERO) == 0) {
+
+                throw new InvalidParameterException(
+                        messageSource.getMessage(
+                                Constant.INVALID_AMOUNT, null, LocaleContextHolder.getLocale()));
             }
+
+            // Generate reference code
+            String referenceCode = new ULID().nextULID();
 
             boolean isSender = create.getCustomerAmount().compareTo(BigDecimal.ZERO) < 0;
 
@@ -331,6 +385,8 @@ public class TransactionServiceImpl implements TransactionService {
                             .previousBalance(customer.get().getBalance())
                             .currentBalance(customer.get().getBalance().add(customerAmount))
                             .availableBalance(customerBalance.add(customerAmount))
+                            .referenceCode(referenceCode)
+                            .type(TransactionType.SYSTEM)
                             .direction(isSender ? Direction.SEND : Direction.RECEIVE)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -346,6 +402,8 @@ public class TransactionServiceImpl implements TransactionService {
                             .previousBalance(master.get().getBalance())
                             .currentBalance(master.get().getBalance().add(masterAmount))
                             .availableBalance(masterBalance.add(masterAmount))
+                            .referenceCode(referenceCode)
+                            .type(TransactionType.SYSTEM)
                             .direction(!isSender ? Direction.SEND : Direction.RECEIVE)
                             .note(create.getNote())
                             .description(create.getDescription())
@@ -364,6 +422,16 @@ public class TransactionServiceImpl implements TransactionService {
                     master.get().setLastTransactionDate(LocalDateTime.now());
                     master.get().setBalance(master.get().getBalance().add(masterAmount));
                     master.get().setAvailableBalance(masterBalance.add(masterAmount));
+
+                    if (isSender) {
+
+                        customer.get().setTotalExpenditure(customer.get().getTotalExpenditure().add(customerAmount));
+                        master.get().setTotalIncome(master.get().getTotalIncome().add(masterAmount));
+                    } else {
+
+                        customer.get().setTotalIncome(customer.get().getTotalIncome().add(customerAmount));
+                        master.get().setTotalExpenditure(master.get().getTotalExpenditure().add(masterAmount));
+                    }
 
                     accountRepository.saveAll(List.of(customer.get(), master.get()));
 

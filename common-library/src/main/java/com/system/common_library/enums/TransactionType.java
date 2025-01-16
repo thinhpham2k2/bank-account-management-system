@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum TransactionType {
     INTERNAL("Nội bộ"),
     EXTERNAL("Bên ngoài"),
-    PAYMENT("Thanh toán");
+    PAYMENT("Thanh toán"),
+    SYSTEM("Hệ thống");
 
     private final String description;
 }

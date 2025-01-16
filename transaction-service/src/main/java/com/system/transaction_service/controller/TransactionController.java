@@ -1,9 +1,14 @@
 package com.system.transaction_service.controller;
 
+import com.system.common_library.dto.transaction.CreateExternalDTO;
+import com.system.common_library.dto.transaction.CreateInternalDTO;
+import com.system.common_library.dto.transaction.CreatePaymentDTO;
+import com.system.common_library.dto.transaction.CreateSystemDTO;
 import com.system.common_library.enums.*;
 import com.system.transaction_service.dto.request.OTPRequestDTO;
 import com.system.transaction_service.dto.response.PagedDTO;
-import com.system.transaction_service.dto.transaction.*;
+import com.system.transaction_service.dto.transaction.TransactionDTO;
+import com.system.transaction_service.dto.transaction.TransactionExtraDTO;
 import com.system.transaction_service.service.interfaces.NotificationService;
 import com.system.transaction_service.service.interfaces.TransactionDetailService;
 import com.system.transaction_service.util.Constant;
@@ -211,6 +216,29 @@ public class TransactionController {
             throws MethodArgumentTypeMismatchException {
 
         transactionDetailService.createPayment(create);
+
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
+                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+    }
+
+    @PostMapping("/system")
+    @Operation(summary = "Create system transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> createSystem(@RequestBody @Validated CreateSystemDTO create)
+            throws MethodArgumentTypeMismatchException {
+
+        transactionDetailService.createSystem(create);
 
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
                 messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));

@@ -1,4 +1,4 @@
-package com.system.transaction_service.dto.transaction;
+package com.system.common_library.dto.transaction;
 
 import com.system.common_library.enums.AccountType;
 import com.system.common_library.enums.FeePayer;

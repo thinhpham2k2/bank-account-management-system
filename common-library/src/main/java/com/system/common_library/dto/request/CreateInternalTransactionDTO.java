@@ -22,14 +22,14 @@ public class CreateInternalTransactionDTO implements Serializable {
     @Size(min = 2, max = 255, message = "{" + Constant.ACCOUNT_NUMBER_SIZE + "}")
     private String senderAccountNumber;
 
-    @Range(min = -1000000000, max = 0, message = "{" + Constant.INVALID_AMOUNT_NEGATE + "}")
+    @Range(min = -1000000000, max = -1, message = "{" + Constant.INVALID_AMOUNT_NEGATE + "}")
     private BigDecimal senderAmount;
 
     @NotNull(message = "{" + Constant.ACCOUNT_NUMBER_REQUIRE + "}")
     @Size(min = 2, max = 255, message = "{" + Constant.ACCOUNT_NUMBER_SIZE + "}")
     private String receiverAccountNumber;
 
-    @Range(min = 0, max = 1000000000, message = "{" + Constant.INVALID_AMOUNT + "}")
+    @Range(min = 1, max = 1000000000, message = "{" + Constant.INVALID_AMOUNT + "}")
     private BigDecimal receiverAmount;
 
     @NotNull(message = "{" + Constant.ACCOUNT_NUMBER_REQUIRE + "}")

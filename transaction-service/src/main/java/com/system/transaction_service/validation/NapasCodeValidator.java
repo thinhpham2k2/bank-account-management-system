@@ -27,7 +27,6 @@ public class NapasCodeValidator implements ConstraintValidator<NapasCodeConstrai
 
         try {
 
-            constraintValidatorContext.disableDefaultConstraintViolation();
             if (externalBankRepository.existsByNapasCode(value.toString())) {
 
                 constraintValidatorContext

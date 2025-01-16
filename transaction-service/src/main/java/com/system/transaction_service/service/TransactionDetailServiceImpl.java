@@ -1,10 +1,15 @@
 package com.system.transaction_service.service;
 
 import com.system.common_library.dto.response.AccountDTO;
+import com.system.common_library.dto.transaction.CreateExternalDTO;
+import com.system.common_library.dto.transaction.CreateInternalDTO;
+import com.system.common_library.dto.transaction.CreatePaymentDTO;
+import com.system.common_library.dto.transaction.CreateSystemDTO;
 import com.system.common_library.enums.*;
 import com.system.transaction_service.config.VaultConfig;
 import com.system.transaction_service.dto.response.PagedDTO;
-import com.system.transaction_service.dto.transaction.*;
+import com.system.transaction_service.dto.transaction.TransactionDTO;
+import com.system.transaction_service.dto.transaction.TransactionExtraDTO;
 import com.system.transaction_service.entity.ExternalTransaction;
 import com.system.transaction_service.entity.InternalTransaction;
 import com.system.transaction_service.entity.TransactionDetail;
@@ -229,6 +234,11 @@ public class TransactionDetailServiceImpl implements TransactionDetailService {
 
     @Override
     public void createPayment(CreatePaymentDTO create) {
+
+    }
+
+    @Override
+    public void createSystem(CreateSystemDTO create) {
 
     }
 }

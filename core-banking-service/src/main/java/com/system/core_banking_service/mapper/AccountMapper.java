@@ -18,6 +18,8 @@ public interface AccountMapper {
     AccountDTO entityToDTO(Account entity);
 
     @Mapping(target = "id", expression = "java(mapId())")
+    @Mapping(target = "totalIncome", source = "balance")
+    @Mapping(target = "totalExpenditure", expression = "java(java.math.BigDecimal.ZERO)")
     @Mapping(target = "state", expression = "java(true)")
     @Mapping(target = "status", expression = "java(true)")
     Account createToEntity(CreateAccountDTO create);

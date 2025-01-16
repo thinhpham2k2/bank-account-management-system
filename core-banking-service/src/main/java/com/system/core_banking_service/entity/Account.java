@@ -33,6 +33,12 @@ public class Account extends BaseEntity implements Serializable {
     @Column(name = "available_balance")
     private BigDecimal availableBalance;
 
+    @Column(name = "total_income")
+    private BigDecimal totalIncome;
+
+    @Column(name = "total_expenditure")
+    private BigDecimal totalExpenditure;
+
     @Column(name = "customer_id")
     private String customerId;
 
