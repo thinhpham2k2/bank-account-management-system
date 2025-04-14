@@ -1,6 +1,8 @@
 package com.system.core_banking_service.advice;
 
+import com.system.common_library.exception.GroupValidationException;
 import com.system.core_banking_service.util.Constant;
+import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -88,6 +90,23 @@ public class ApplicationExceptionHandler {
             String fieldName = fieldError.getField();
             String errorMessage = fieldError.getDefaultMessage();
 
+            errorMap.computeIfAbsent(fieldName, k -> new HashSet<>()).add(errorMessage);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                .body(errorMap);
+    }
+
+    @ExceptionHandler(GroupValidationException.class)
+    public ResponseEntity<?> handleGroupValidationException(GroupValidationException ex) {
+
+        Map<String, Set<String>> errorMap = new HashMap<>();
+        Set<ConstraintViolation<Object>> violations = ex.getViolations();
+
+        for (ConstraintViolation<?> violation : violations) {
+
+            String fieldName = violation.getPropertyPath().toString();
+            String errorMessage = violation.getMessage();
             errorMap.computeIfAbsent(fieldName, k -> new HashSet<>()).add(errorMessage);
         }
 

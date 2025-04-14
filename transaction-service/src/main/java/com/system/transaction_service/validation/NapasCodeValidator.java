@@ -2,7 +2,7 @@ package com.system.transaction_service.validation;
 
 import com.system.transaction_service.repository.ExternalBankRepository;
 import com.system.transaction_service.util.Constant;
-import com.system.transaction_service.validation.interfaces.NapasCodeConstraint;
+import com.system.transaction_service.validation.annotation.NapasCodeConstraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,8 @@ public class NapasCodeValidator implements ConstraintValidator<NapasCodeConstrai
 
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate(
-                            messageSource.getMessage(Constant.INVALID_NAPAS_CODE, null, LocaleContextHolder.getLocale()))
+                            messageSource.getMessage(Constant.INVALID_NAPAS_CODE,
+                                    null, LocaleContextHolder.getLocale()))
                     .addConstraintViolation();
 
             return false;

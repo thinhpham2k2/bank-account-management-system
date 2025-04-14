@@ -29,6 +29,12 @@ public class Transaction extends BaseEntity implements Serializable {
     @Column(name = "napas_code")
     private String napasCode;
 
+    @Column(name = "sender_account")
+    private String senderAccount;
+
+    @Column(name = "receiver_account")
+    private String receiverAccount;
+
     @Column(name = "amount")
     private BigDecimal amount;
 

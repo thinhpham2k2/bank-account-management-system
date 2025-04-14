@@ -6,11 +6,14 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum AccountType {
-    PAYMENT("Tài khoản thanh toán"),
-    SAVINGS("Tài khoản tiết kiệm"),
-    LOAN("Tài khoản vay"),
-    SALARY("Tài khoản lương"),
-    BUSINESS("Tài khoản doanh nghiệp");
+    PAYMENT(0, "Tài khoản thanh toán"),
+    SAVINGS(1, "Tài khoản tiết kiệm"),
+    LOAN(2, "Tài khoản vay"),
+    CREDIT(3, "Tài khoản tín dụng"),
+    SALARY(4, "Tài khoản lương"),
+    BUSINESS(5, "Tài khoản doanh nghiệp");
+
+    private final int value;
 
     private final String description;
 }

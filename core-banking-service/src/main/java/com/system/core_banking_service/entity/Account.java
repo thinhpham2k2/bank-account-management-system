@@ -1,5 +1,7 @@
 package com.system.core_banking_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.system.common_library.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -21,8 +24,10 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class Account extends BaseEntity implements Serializable {
 
-    @Column(name = "account_id")
-    private String accountId;
+    @ManyToOne
+    @JsonManagedReference
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @Column(name = "account_number")
     private String accountNumber;
@@ -39,15 +44,6 @@ public class Account extends BaseEntity implements Serializable {
     @Column(name = "total_expenditure")
     private BigDecimal totalExpenditure;
 
-    @Column(name = "customer_id")
-    private String customerId;
-
-    @Column(name = "customer_name")
-    private String customerName;
-
-    @Column(name = "customer_phone")
-    private String customerPhone;
-
     @Column(name = "currency")
     private String currency;
 
@@ -60,4 +56,8 @@ public class Account extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private AccountType type;
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<Transaction> transactionList;
 }

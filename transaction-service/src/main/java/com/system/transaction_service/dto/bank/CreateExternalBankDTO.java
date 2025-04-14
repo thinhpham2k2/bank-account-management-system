@@ -1,10 +1,10 @@
 package com.system.transaction_service.dto.bank;
 
 import com.system.transaction_service.util.Constant;
-import com.system.transaction_service.validation.interfaces.BankCodeConstraint;
-import com.system.transaction_service.validation.interfaces.FileConstraint;
-import com.system.transaction_service.validation.interfaces.NapasCodeConstraint;
-import com.system.transaction_service.validation.interfaces.SwiftCodeConstraint;
+import com.system.transaction_service.validation.annotation.BankCodeConstraint;
+import com.system.transaction_service.validation.annotation.FileConstraint;
+import com.system.transaction_service.validation.annotation.NapasCodeConstraint;
+import com.system.transaction_service.validation.annotation.SwiftCodeConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

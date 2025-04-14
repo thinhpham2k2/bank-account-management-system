@@ -15,6 +15,7 @@ import com.system.napas_service.util.Constant;
 import de.huxhorn.sulky.ulid.ULID;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.security.InvalidParameterException;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,6 +46,7 @@ public class BankServiceImpl implements BankService {
     @Override
     public BankExtraDTO findById(String id) {
 
+        log.info("Entering findById with parameters: id = {}", id);
         Optional<Bank> bank = bankRepository.findByIdAndStatus(id, true);
 
         return bank.map(bankMapper::entityToExtraDTO).orElse(null);
@@ -53,6 +56,8 @@ public class BankServiceImpl implements BankService {
     public PagedDTO<BankDTO> findAllByCondition(
             Boolean isAvailable, String search, String sort, int page, int limit) {
 
+        log.info("Entering findAllByCondition with parameters: " +
+                "isAvailable = {}, search = {}, sort = {}, page = {}, limit = {}", isAvailable, search, sort, page, limit);
         Pageable pageable = pagingService.getPageable(sort, page, limit, Bank.class);
         Page<Bank> pageResult = bankRepository.findAllByCondition(true, isAvailable, search, pageable);
 
@@ -64,6 +69,7 @@ public class BankServiceImpl implements BankService {
 
         try {
 
+            log.info("Entering create with parameters: create = {}", create.toString());
             Bank bank = bankMapper.createToEntity(create);
 
             String fileName = FOLDER_NAME + "/" + new ULID().nextULID();
@@ -72,11 +78,14 @@ public class BankServiceImpl implements BankService {
 
                 bank.setLogo(link);
                 bank.setLogoImageName(fileName);
+                log.info("File name: {}", fileName);
+                log.info("Link image: {}", link);
             }
 
             bankRepository.save(bank);
         } catch (Exception e) {
 
+            log.error(e.getMessage());
             throw new InvalidParameterException(
                     messageSource.getMessage(Constant.CREATE_FAIL, null, LocaleContextHolder.getLocale()));
         }
@@ -85,9 +94,11 @@ public class BankServiceImpl implements BankService {
     @Override
     public void update(UpdateBankDTO update, String id) {
 
+        log.info("Entering update with parameters: id = {}, update = {}", id, update.toString());
         Optional<Bank> bank = bankRepository.findByIdAndStatus(id, true);
         if (bank.isPresent()) {
 
+            log.info("Bank is exist");
             try {
 
                 if (!Optional.ofNullable(bank.get().getLogo()).orElse("").isBlank() &&
@@ -102,16 +113,20 @@ public class BankServiceImpl implements BankService {
 
                     bank.get().setLogo(link);
                     bank.get().setLogoImageName(fileName);
+                    log.info("File name: {}", fileName);
+                    log.info("Link image: {}", link);
                 }
 
                 bankRepository.save(bankMapper.updateToEntity(update, bank.get()));
             } catch (Exception e) {
 
+                log.error(e.getMessage());
                 throw new InvalidParameterException(
                         messageSource.getMessage(Constant.UPDATE_FAIL, null, LocaleContextHolder.getLocale()));
             }
         } else {
 
+            log.error("Bank is not exist");
             throw new InvalidParameterException(
                     messageSource.getMessage(Constant.INVALID_BANK, null, LocaleContextHolder.getLocale()));
         }
@@ -120,9 +135,11 @@ public class BankServiceImpl implements BankService {
     @Override
     public void delete(String id) {
 
+        log.info("Entering delete with parameters: id = {}", id);
         Optional<Bank> bank = bankRepository.findByIdAndStatus(id, true);
         if (bank.isPresent()) {
 
+            log.info("Bank is exist");
             try {
 
                 if (!bank.get().getLogo().isBlank() && !bank.get().getLogoImageName().isBlank()) {
@@ -131,14 +148,17 @@ public class BankServiceImpl implements BankService {
                 }
 
                 bank.get().setStatus(false);
+                log.info("Set status to false");
                 bankRepository.save(bank.get());
             } catch (Exception e) {
 
+                log.error(e.getMessage());
                 throw new InvalidParameterException(
                         messageSource.getMessage(Constant.DELETE_FAIL, null, LocaleContextHolder.getLocale()));
             }
         } else {
 
+            log.info("Bank is not exist");
             throw new InvalidParameterException(
                     messageSource.getMessage(Constant.INVALID_BANK, null, LocaleContextHolder.getLocale()));
         }

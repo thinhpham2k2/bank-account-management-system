@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.CreatedBy;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -27,6 +26,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Transaction extends BaseEntity implements Serializable {
+
+    @Column(name = "cif_code")
+    private String cifCode;
 
     @Column(name = "sender_account_id")
     private String senderAccountId;
@@ -54,8 +56,14 @@ public abstract class Transaction extends BaseEntity implements Serializable {
     @Column(name = "receiver_account_name")
     private String receiverAccountName;
 
-    @Column(name = "transaction_code")
-    private String transactionCode;
+    @Column(name = "reference_code")
+    private String referenceCode;
+
+    @Column(name = "core_rollback_code")
+    private String coreRollbackCode;
+
+    @Column(name = "napas_rollback_code")
+    private String napasRollbackCode;
 
     @Column(name = "amount")
     private BigDecimal amount;
@@ -85,15 +93,11 @@ public abstract class Transaction extends BaseEntity implements Serializable {
     @Column(name = "method")
     private Method method;
 
-    @CreatedBy
-    @Column(name = "creator_id", nullable = false, updatable = false)
-    private String creatorId;
-
-    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
     private List<TransactionDetail> transactionDetailList;
 
-    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
     private List<TransactionState> transactionStateList;
 }

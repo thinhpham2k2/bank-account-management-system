@@ -2,7 +2,7 @@ package com.system.napas_service.validation;
 
 import com.system.napas_service.repository.BankRepository;
 import com.system.napas_service.util.Constant;
-import com.system.napas_service.validation.interfaces.NapasCodeConstraint;
+import com.system.napas_service.validation.annotation.NapasCodeConstraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;

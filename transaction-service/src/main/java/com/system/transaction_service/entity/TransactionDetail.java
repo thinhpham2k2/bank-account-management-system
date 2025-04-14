@@ -26,6 +26,9 @@ public class TransactionDetail extends BaseEntity implements Serializable {
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
+    @Column(name = "customer_id")
+    private String customerId;
+
     @Column(name = "account")
     private String account;
 
@@ -50,7 +53,4 @@ public class TransactionDetail extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "direction")
     private Direction direction;
-
-    @Column(name = "reference_code")
-    private String referenceCode;
 }

@@ -6,7 +6,7 @@ COPY ./common-library/ ./common-library
 WORKDIR /app/common-library
 RUN mvn clean package
 
-# Stage 2: Use Maven for building transaction service
+# Stage 2: Use Maven for building core banking service
 FROM maven:3.9.9-sapmachine-17 AS build
 LABEL authors="ctv"
 WORKDIR /app

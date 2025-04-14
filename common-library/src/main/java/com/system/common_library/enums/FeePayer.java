@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FeePayer {
-    SENDER("Người gửi chịu phí"),
-    RECEIVER("Người nhận chịu phí");
+    SENDER("Người chuyển"),
+    RECEIVER("Người nhận");
 
     private final String description;
 }

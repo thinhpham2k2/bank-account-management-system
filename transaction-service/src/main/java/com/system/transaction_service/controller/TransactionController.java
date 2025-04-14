@@ -1,14 +1,9 @@
 package com.system.transaction_service.controller;
 
-import com.system.common_library.dto.transaction.CreateExternalDTO;
-import com.system.common_library.dto.transaction.CreateInternalDTO;
-import com.system.common_library.dto.transaction.CreatePaymentDTO;
-import com.system.common_library.dto.transaction.CreateSystemDTO;
+import com.system.common_library.dto.transaction.*;
 import com.system.common_library.enums.*;
 import com.system.transaction_service.dto.request.OTPRequestDTO;
 import com.system.transaction_service.dto.response.PagedDTO;
-import com.system.transaction_service.dto.transaction.TransactionDTO;
-import com.system.transaction_service.dto.transaction.TransactionExtraDTO;
 import com.system.transaction_service.service.interfaces.NotificationService;
 import com.system.transaction_service.service.interfaces.TransactionDetailService;
 import com.system.transaction_service.util.Constant;
@@ -51,8 +46,8 @@ public class TransactionController {
     @Operation(summary = "Get transaction list")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = PagedDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PagedDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "Not Found", content =
@@ -73,6 +68,8 @@ public class TransactionController {
                                      @RequestParam(required = false) List<Method> methodList,
                                      @Parameter(description = "<b>Filter by transaction type<b>")
                                      @RequestParam(required = false) List<TransactionType> transactionTypeList,
+                                     @Parameter(description = "<b>Filter by transaction state<b>")
+                                     @RequestParam(required = false) List<State> stateList,
                                      @Parameter(description = "<b>Filter by internal transaction type<b>")
                                      @RequestParam(required = false) List<Type> typeList,
                                      @RequestParam(defaultValue = "id,desc") String sort,
@@ -83,8 +80,8 @@ public class TransactionController {
         PagedDTO<TransactionDTO> list = transactionDetailService.findAllByCondition(
                 Optional.ofNullable(directionList).orElse(List.of()), Optional.ofNullable(feePayerList).orElse(List.of()),
                 Optional.ofNullable(initiatorList).orElse(List.of()), Optional.ofNullable(methodList).orElse(List.of()),
-                Optional.ofNullable(transactionTypeList).orElse(List.of()), Optional.ofNullable(typeList).orElse(List.of()),
-                search, amountStart, amountEnd, sort, page, limit);
+                Optional.ofNullable(transactionTypeList).orElse(List.of()), Optional.ofNullable(stateList).orElse(List.of()),
+                Optional.ofNullable(typeList).orElse(List.of()), search, amountStart, amountEnd, sort, page, limit);
 
         if (!list.getContent().isEmpty()) {
 
@@ -100,8 +97,8 @@ public class TransactionController {
     @Operation(summary = "Get transaction by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = TransactionExtraDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TransactionExtraDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -129,7 +126,7 @@ public class TransactionController {
     }
 
     @PostMapping("/otp-code")
-    @Operation(summary = "Send OTP code to email")
+    @Operation(summary = "Resend OTP code to email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
@@ -153,10 +150,10 @@ public class TransactionController {
     }
 
     @PostMapping("/external")
-    @Operation(summary = "Create external transaction")
+    @Operation(summary = "Initiate external transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionInitDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -165,21 +162,51 @@ public class TransactionController {
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
     })
-    public ResponseEntity<?> createExternal(@RequestBody @Validated CreateExternalDTO create)
+    public ResponseEntity<?> initiateExternal(@RequestBody @Validated CreateExternalDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        transactionDetailService.createExternal(create);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(transactionDetailService.createExternal(create));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
-                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+    @PutMapping("/external/{id}/confirm")
+    @Operation(summary = "Confirm external transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content =
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionExtraDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> confirmExternal(@PathVariable(value = "id") String transactionsId, @RequestParam String otp)
+            throws MethodArgumentTypeMismatchException {
+
+        TransactionExtraDTO result = transactionDetailService.confirmExternal(transactionsId, otp);
+
+        if (result != null) {
+
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.CONFIRM_FAIL, null, LocaleContextHolder.getLocale()));
     }
 
     @PostMapping("/internal")
-    @Operation(summary = "Create internal transaction")
+    @Operation(summary = "Initiate internal transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionInitDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -188,21 +215,51 @@ public class TransactionController {
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
     })
-    public ResponseEntity<?> createInternal(@RequestBody @Validated CreateInternalDTO create)
+    public ResponseEntity<?> initiateInternal(@RequestBody @Validated CreateInternalDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        transactionDetailService.createInternal(create);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(transactionDetailService.createInternal(create));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
-                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+    @PutMapping("/internal/{id}/confirm")
+    @Operation(summary = "Confirm internal transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content =
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionExtraDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> confirmInternal(@PathVariable(value = "id") String transactionsId, @RequestParam String otp)
+            throws MethodArgumentTypeMismatchException {
+
+        TransactionExtraDTO result = transactionDetailService.confirmInternal(transactionsId, otp);
+
+        if (result != null) {
+
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.CONFIRM_FAIL, null, LocaleContextHolder.getLocale()));
     }
 
     @PostMapping("/payment")
-    @Operation(summary = "Create payment transaction")
+    @Operation(summary = "Initiate payment transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionInitDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -211,21 +268,51 @@ public class TransactionController {
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
     })
-    public ResponseEntity<?> createPayment(@RequestBody @Validated CreatePaymentDTO create)
+    public ResponseEntity<?> initiatePayment(@RequestBody @Validated CreatePaymentDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        transactionDetailService.createPayment(create);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(transactionDetailService.createPayment(create));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
-                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+    @PutMapping("/payment/{id}/confirm")
+    @Operation(summary = "Confirm payment transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content =
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionExtraDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> confirmPayment(@PathVariable(value = "id") String transactionsId, @RequestParam String otp)
+            throws MethodArgumentTypeMismatchException {
+
+        TransactionExtraDTO result = transactionDetailService.confirmPayment(transactionsId, otp);
+
+        if (result != null) {
+
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.CONFIRM_FAIL, null, LocaleContextHolder.getLocale()));
     }
 
     @PostMapping("/system")
     @Operation(summary = "Create system transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = TransactionInitDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -234,13 +321,32 @@ public class TransactionController {
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
     })
     public ResponseEntity<?> createSystem(@RequestBody @Validated CreateSystemDTO create)
             throws MethodArgumentTypeMismatchException {
 
-        transactionDetailService.createSystem(create);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(transactionDetailService.createSystem(create));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(
-                messageSource.getMessage(Constant.CREATE_SUCCESS, null, LocaleContextHolder.getLocale()));
+    @PostMapping("/{id}/rollback")
+    @Operation(summary = "Rollback transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
+                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
+    })
+    public ResponseEntity<?> rollback(@PathVariable(value = "id") String transactionsId)
+            throws MethodArgumentTypeMismatchException {
+
+        transactionDetailService.rollback(transactionsId);
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.ROLLBACK_SUCCESS, null, LocaleContextHolder.getLocale()));
     }
 }

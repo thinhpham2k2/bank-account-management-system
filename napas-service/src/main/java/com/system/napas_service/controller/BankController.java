@@ -37,8 +37,8 @@ public class BankController {
     @Operation(summary = "Get bank list")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = PagedDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PagedDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "Not Found", content =
@@ -69,8 +69,8 @@ public class BankController {
     @Operation(summary = "Get bank by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = BankExtraDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = BankExtraDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =
@@ -104,10 +104,6 @@ public class BankController {
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "413", description = "Payload Too Large", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
@@ -128,10 +124,6 @@ public class BankController {
             @ApiResponse(responseCode = "200", description = "Success", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "413", description = "Payload Too Large", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
@@ -154,10 +146,6 @@ public class BankController {
             @ApiResponse(responseCode = "204", description = "No Content", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "400", description = "Fail", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content =
-                    {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),

@@ -2,7 +2,7 @@ package com.system.transaction_service.validation;
 
 import com.system.transaction_service.repository.ExternalBankRepository;
 import com.system.transaction_service.util.Constant;
-import com.system.transaction_service.validation.interfaces.SwiftCodeConstraint;
+import com.system.transaction_service.validation.annotation.SwiftCodeConstraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;

@@ -39,8 +39,8 @@ public class ExternalBankController {
     @Operation(summary = "Get external bank list")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = PagedDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PagedDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "Not Found", content =
@@ -71,8 +71,8 @@ public class ExternalBankController {
     @Operation(summary = "Get external bank by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content =
-                    {@Content(mediaType = "application/json", schema =
-                    @Schema(implementation = ExternalBankExtraDTO.class))}),
+                    {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExternalBankExtraDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request", content =
                     {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content =

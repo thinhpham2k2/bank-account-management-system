@@ -1,10 +1,10 @@
 package com.system.napas_service.dto.bank;
 
 import com.system.napas_service.util.Constant;
-import com.system.napas_service.validation.interfaces.BankCodeConstraint;
-import com.system.napas_service.validation.interfaces.FileConstraint;
-import com.system.napas_service.validation.interfaces.NapasCodeConstraint;
-import com.system.napas_service.validation.interfaces.SwiftCodeConstraint;
+import com.system.napas_service.validation.annotation.BankCodeConstraint;
+import com.system.napas_service.validation.annotation.FileConstraint;
+import com.system.napas_service.validation.annotation.NapasCodeConstraint;
+import com.system.napas_service.validation.annotation.SwiftCodeConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

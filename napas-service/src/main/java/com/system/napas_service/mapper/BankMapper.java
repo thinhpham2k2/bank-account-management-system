@@ -25,8 +25,6 @@ public interface BankMapper {
     Bank createToEntity(CreateBankDTO create);
 
     @Mapping(target = "logo", ignore = true)
-    @Mapping(target = "state", expression = "java(true)")
-    @Mapping(target = "status", expression = "java(true)")
     Bank updateToEntity(UpdateBankDTO update, @MappingTarget Bank entity);
 
     @Named("mapId")

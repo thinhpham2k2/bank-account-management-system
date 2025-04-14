@@ -41,4 +41,21 @@ public class Constant implements Serializable {
     public static final String INVALID_IMAGE_FILE = "message.invalid.image.file";
     public static final String INVALID_IMAGE_FILE_SIZE = "message.invalid.image.file.size";
     public static final String INVALID_IMAGE_FILE_TYPE = "message.invalid.image.file.type";
+    public static final String ACCOUNT_ID_REQUIRE = "message.account.id.require";
+    public static final String ACCOUNT_ID_SIZE = "message.account.id.size";
+    public static final String ACCOUNT_NUMBER_REQUIRE = "message.account.number.require";
+    public static final String ACCOUNT_NUMBER_SIZE = "message.account.number.size";
+    public static final String INVALID_BALANCE = "message.invalid.balance";
+    public static final String INVALID_AVAILABLE_BALANCE = "message.invalid.available.balance";
+    public static final String EXCEED_AVAILABLE_BALANCE = "message.exceed.available.balance";
+    public static final String IS_ACTIVE_REQUIRE = "message.is.active.require";
+    public static final String BANK_ID_REQUIRE = "message.bank.id.require";
+    public static final String INVALID_ACCOUNT = "message.invalid.account";
+    public static final String DUPLICATE_ACCOUNT_ID = "message.duplicate.account.id";
+    public static final String INVALID_ACCOUNT_ID = "message.invalid.account.id";
+    public static final String DUPLICATE_ACCOUNT_NUMBER = "message.duplicate.account.number";
+    public static final String INVALID_ACCOUNT_NUMBER = "message.invalid.account.number";
+    public static final String INVALID_TRANSACTION_ID = "message.invalid.transaction.id";
+    public static final String ROLLBACK_FAIL = "message.rollback.fail";
+    public static final String ROLLBACK_SUCCESS = "message.rollback.success";
 }

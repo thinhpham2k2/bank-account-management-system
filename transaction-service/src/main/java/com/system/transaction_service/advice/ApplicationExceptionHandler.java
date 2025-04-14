@@ -1,10 +1,13 @@
 package com.system.transaction_service.advice;
 
 import com.system.transaction_service.util.Constant;
+import feign.FeignException;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,11 +33,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class ApplicationExceptionHandler {
 
     private final MessageSource messageSource;
+
+    @ExceptionHandler({FeignException.class})
+    public ResponseEntity<?> handleFeignException(FeignException ex) {
+
+        if (ex.status() == 404) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_PLAIN)
+                    .body(this.extractResponseBody(ex.responseBody().orElse(null)));
+        }
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(MediaType.TEXT_PLAIN)
+                .body(messageSource.getMessage(Constant.SERVICE_UNAVAILABLE, null, LocaleContextHolder.getLocale()));
+    }
 
     @ExceptionHandler({MaxUploadSizeExceededException.class})
     public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
@@ -92,12 +111,12 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
 
+        log.error(ex.getMessage());
         if (ex instanceof AccessDeniedException) {
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.TEXT_PLAIN)
                     .body(messageSource.getMessage(Constant.FORBIDDEN, null, LocaleContextHolder.getLocale()));
         }
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.TEXT_PLAIN)
                 .body(messageSource.getMessage(Constant.INTERNAL_SERVER_ERROR, null, LocaleContextHolder.getLocale()));
     }
@@ -124,5 +143,20 @@ public class ApplicationExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                 .body(errorMap);
+    }
+
+    private String extractResponseBody(ByteBuffer responseBody) {
+
+        try {
+
+            if (responseBody != null) {
+
+                return IOUtils.toString(responseBody.array(), StandardCharsets.UTF_8.toString());
+            }
+        } catch (Exception ignore) {
+
+        }
+
+        return messageSource.getMessage(Constant.NOT_FOUND, null, LocaleContextHolder.getLocale());
     }
 }

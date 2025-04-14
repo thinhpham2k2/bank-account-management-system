@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+@EnableJpaAuditing
 public class SecurityConfig {
 
     private final MessageSource messageSource;
@@ -34,7 +34,8 @@ public class SecurityConfig {
             "/swagger/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/actuator/**"
+            "/actuator/**",
+            "/api/v1/**"
     };
 
     @Bean

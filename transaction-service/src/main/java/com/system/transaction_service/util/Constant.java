@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Constant implements Serializable {
 
     public static final String BLANK = "";
+    public static final String STRING = "string";
     public static final String CACHE_TRANSACTION_PREFIX = "transaction:";
     public static final String NOT_FOUND = "message.not.found";
     public static final String CREATE_SUCCESS = "message.create.success";
@@ -13,6 +14,7 @@ public class Constant implements Serializable {
     public static final String UPDATE_FAIL = "message.update.fail";
     public static final String DELETE_SUCCESS = "message.delete.success";
     public static final String DELETE_FAIL = "message.delete.fail";
+    public static final String CONFIRM_FAIL = "message.confirm.fail";
     public static final String UNAUTHORIZED = "message.unauthorized";
     public static final String FORBIDDEN = "message.forbidden";
     public static final String INTERNAL_SERVER_ERROR = "message.internal.server.error";
@@ -54,6 +56,20 @@ public class Constant implements Serializable {
     public static final String PAYLOAD_TOO_LARGE = "message.payload.too.media";
     public static final String INVALID_OTP_CODE = "message.invalid.otp.code";
     public static final String INSUFFICIENT_BALANCE = "message.insufficient.balance";
+    public static final String INSUFFICIENT_MASTER_BALANCE = "message.insufficient.master.balance";
     public static final String SEND_OTP_SUCCESS = "message.send.otp.success";
     public static final String SEND_OTP_FAILED = "message.send.otp.failed";
+    public static final String INVALID_TRANSACTION_ID = "message.invalid.transaction.id";
+    public static final String TRANSACTION_ID_REQUIRE = "message.transaction.id.require";
+    public static final String INVALID_SENDER_ACCOUNT = "message.invalid.sender.account";
+    public static final String INVALID_RECEIVER_ACCOUNT = "message.invalid.receiver.account";
+    public static final String INVALID_MASTER_ACCOUNT = "message.invalid.master.account";
+    public static final String INVALID_CUSTOMER_ACCOUNT = "message.invalid.customer.account";
+    public static final String INVALID_AMOUNT = "message.invalid.amount";
+    public static final String INVALID_TRANSACTION = "message.invalid.transaction";
+    public static final String DUPLICATE_ACCOUNT_NUMBER = "message.duplicate.account.number";
+    public static final String ROLLBACK_FAIL = "message.rollback.fail";
+    public static final String ROLLBACK_SUCCESS = "message.rollback.success";
+    public static final String INVALID_CUSTOMER = "message.invalid.customer";
+    public static final String INVALID_ACCOUNT_TYPE = "message.invalid.account.type";
 }

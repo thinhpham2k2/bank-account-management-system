@@ -1,7 +1,7 @@
 package com.system.napas_service.validation;
 
 import com.system.napas_service.util.Constant;
-import com.system.napas_service.validation.interfaces.FileConstraint;
+import com.system.napas_service.validation.annotation.FileConstraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
