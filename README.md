@@ -5,11 +5,13 @@
   <img width="204" alt="logo-kienlongbank" src="https://firebasestorage.googleapis.com/v0/b/upload-file-2ac29.appspot.com/o/logo-kienlongbank.png?alt=media&token=f4c1d2f2-3c2e-4c5f-903d-33b24f884ee0" />
 </div>
 
+# 🏗️ System architecture
+
+![Nghiệp vụ](https://github.com/user-attachments/assets/840e9884-0886-4cf1-bb64-da36e04f47a2)
+
 []([url](url))
 
 # K3-Banking-System
-
-
 
 ## Getting started
 
